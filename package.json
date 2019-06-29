@@ -1,0 +1,26 @@
+{
+  "name": "alethiocli",
+  "version": "1.0.0",
+  "description": "CLI Explorer for Ethereum Contracts using Alethio API",
+  "main": "CLITool.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tezansahu/AlethioCLI.git"
+  },
+  "keywords": [
+    "Alethio"
+  ],
+  "author": "Tezan Sahu, Smit Rajput",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tezansahu/AlethioCLI/issues"
+  },
+  "homepage": "https://github.com/tezansahu/AlethioCLI#readme",
+  "dependencies": {
+    "commander": "^2.20.0",
+    "isomorphic-fetch": "^2.2.1"
+  }
+}
