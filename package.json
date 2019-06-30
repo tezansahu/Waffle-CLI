@@ -2,7 +2,7 @@
   "name": "alethiocli",
   "version": "1.0.0",
   "description": "CLI Explorer for Ethereum Contracts using Alethio API",
-  "main": "CLITool.js",
+  "main": "alethiocli.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,7 +20,12 @@
   },
   "homepage": "https://github.com/tezansahu/AlethioCLI#readme",
   "dependencies": {
+    "chalk": "^2.4.2",
+    "clear": "^0.1.0",
     "commander": "^2.20.0",
-    "isomorphic-fetch": "^2.2.1"
+    "figlet": "^1.2.3",
+    "inquirer": "^6.4.1",
+    "isomorphic-fetch": "^2.2.1",
+    "ora": "^3.4.0"
   }
 }
