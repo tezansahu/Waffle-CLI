@@ -10,7 +10,7 @@ const inquirer = require("inquirer");
 const ora = require('ora');
 require("isomorphic-fetch");
 
-const spinner = ora('Fetching data from Aleth.IO');
+const spinner = ora('Fetching data from Aleth.io');
 let base_url;
 
 // {"API_KEY":"main_k5ua5idae7skpuciub5afanpxys3q
@@ -60,7 +60,7 @@ async function run(){
     clear();
     console.log(
         chalk.yellow(
-            figlet.textSync('Aleth.IO CLI', { horizontalLayout: 'full' })
+            figlet.textSync('Aleth.io CLI', { horizontalLayout: 'full' })
         )
     );
     let api_key_verified = await checkAPIkey();
