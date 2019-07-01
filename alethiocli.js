@@ -56,11 +56,24 @@ program
         console.log(await data.json());
     })
 
+program
+    .command("getContractDetails")
+    .description("")
+    // .option("")
+    .action(async () => {
+        spinner.start();
+        let args = process.argv;
+        //console.log(`/contracts/${args[0]}`);
+        const data = await fetch(base_url+`/contracts/${args[0]}`);
+        spinner.stop();
+        console.log(await data.json());
+    })
+
 async function run(){
     clear();
     console.log(
         chalk.yellow(
-            figlet.textSync('Aleth.IO CLI', { horizontalLayout: 'full' })
+            figlet.textSync('aleth.io CLI', { horizontalLayout: 'full' })
         )
     );
     let api_key_verified = await checkAPIkey();
