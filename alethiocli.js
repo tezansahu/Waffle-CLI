@@ -8,12 +8,13 @@ const clear = require('clear');
 const figlet = require('figlet');
 const inquirer = require("inquirer");
 const ora = require('ora');
+const moment = require("moment")
 require("isomorphic-fetch");
 
-const spinner = ora('Fetching data from Aleth.io');
+const spinner = ora('Fetching data from aleth.io');
 let base_url;
 
-// {"API_KEY":"main_k5ua5idae7skpuciub5afanpxys3q
+// {"API_KEY":"main_k5ua5idae7skpuciub5afanpxys3q"}
 
 // ---------------------Define functions necessary for the CLI Tool-------------------------------
 async function checkAPIkey(){
@@ -44,6 +45,28 @@ async function checkAPIkey(){
     })
 }
 
+async function getContractDetails(address){
+    spinner.start();
+    const data = await fetch(base_url+`/contracts/${address}`);
+    let jsonData = await data.json();
+    if(jsonData["data"]["relationships"]["token"]["data"] != null){
+        tokenData = await fetch(base_url + "/tokens/" + jsonData["data"]["relationships"]["token"]["data"]["id"])
+        tokenDataJSON = await tokenData.json();
+    }
+    spinner.stop();
+    console.log("Address:\t\t", jsonData["data"]["attributes"]["address"]);
+    console.log("Balance:\t\t", jsonData["data"]["attributes"]["balance"]);
+    console.log("Creation Time:\t\t", moment.unix(parseInt(jsonData["data"]["attributes"]["createdAtTimestamp"])).local().toString());
+    console.log("Constructor Arguments:\t", jsonData["data"]["attributes"]["constructorArgs"])
+    if(jsonData["data"]["relationships"]["token"]["data"] == null){
+        console.log("Token Associated:\tNone", )
+    }
+    else{
+
+        console.log("Token Associated:\t", tokenDataJSON["data"]["attributes"]["name"]);
+    }
+}
+
 // Template for a CLI command
 program
     .command("getLatestBlockData")
@@ -57,27 +80,18 @@ program
     })
 
 program
-    .command("getContractDetails")
-    .description("")
+    .command("getContractDetails <address>")
+    .description("Get general details about a contract deployed at the provided address")
     // .option("")
-    .action(async () => {
-        spinner.start();
-        let args = process.argv;
-        //console.log(`/contracts/${args[0]}`);
-        const data = await fetch(base_url+`/contracts/${args[0]}`);
-        spinner.stop();
-        console.log(await data.json());
+    .action(async (address) => {
+        getContractDetails(address);
     })
 
 async function run(){
     clear();
     console.log(
         chalk.yellow(
-<<<<<<< HEAD
-            figlet.textSync('Aleth.io CLI', { horizontalLayout: 'full' })
-=======
             figlet.textSync('aleth.io CLI', { horizontalLayout: 'full' })
->>>>>>> fdaf269cfa85a1875f38271bc3e2f4b87688cdab
         )
     );
     let api_key_verified = await checkAPIkey();
