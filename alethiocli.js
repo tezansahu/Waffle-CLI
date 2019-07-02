@@ -8,7 +8,7 @@ const clear = require('clear');
 const figlet = require('figlet');
 const inquirer = require("inquirer");
 const ora = require('ora');
-require("isomorphic-fetch");
+
 
 const contract = require("./modules/contractUtils");
 
@@ -61,14 +61,18 @@ program
 program
     .command("getContractDetails <address>")
     .description("Get general details about a contract deployed at the provided address")
-    .option('-t, --transactions')
-    .option("-b, --block")
+    .option('-t, --transactions <num>', "Show details about <num> latest transactions to/from the contract")
+    .option("-b, --block", "Show details about the block where the contract was created")
+    .option("-f, --transactionsFrom <accFrom>", "Show details of transactions made from <accFrom> to the contract")
+    .option("-T, --transactionsTo <accTo>", "Show details of transactions made to <accTo> by the contract")
     .parse(process.argv)
-    .action(async (address) => {
-        //contract.getDetails(base_url, address, spinner);
-        console.log(program.transactions);
-        if(program.transactions){
-            contract.getTransactions(base_url, address, spinner);
+    .action(async (address, options) => {
+        if(options.transactions != undefined){
+            if(parseInt(options.transactions) > 100 || parseInt(options.transactions) < 0){
+                console.error(chalk.red("Number of transactions cannot be more than 100 at a time or less than 0"));
+                return;
+            }
+            contract.getTransactions(base_url, address, options.transactions, spinner);
         }
         // else if(program.block){
 
