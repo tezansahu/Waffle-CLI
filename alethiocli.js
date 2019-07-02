@@ -8,8 +8,9 @@ const clear = require('clear');
 const figlet = require('figlet');
 const inquirer = require("inquirer");
 const ora = require('ora');
-const moment = require("moment")
 require("isomorphic-fetch");
+
+const contract = require("./modules/contractUtils");
 
 const spinner = ora('Fetching data from aleth.io');
 let base_url;
@@ -45,33 +46,11 @@ async function checkAPIkey(){
     })
 }
 
-async function getContractDetails(address){
-    spinner.start();
-    const data = await fetch(base_url+`/contracts/${address}`);
-    let jsonData = await data.json();
-    if(jsonData["data"]["relationships"]["token"]["data"] != null){
-        tokenData = await fetch(base_url + "/tokens/" + jsonData["data"]["relationships"]["token"]["data"]["id"])
-        tokenDataJSON = await tokenData.json();
-    }
-    spinner.stop();
-    console.log("Address:\t\t", jsonData["data"]["attributes"]["address"]);
-    console.log("Balance:\t\t", jsonData["data"]["attributes"]["balance"]);
-    console.log("Creation Time:\t\t", moment.unix(parseInt(jsonData["data"]["attributes"]["createdAtTimestamp"])).local().toString());
-    console.log("Constructor Arguments:\t", jsonData["data"]["attributes"]["constructorArgs"])
-    if(jsonData["data"]["relationships"]["token"]["data"] == null){
-        console.log("Token Associated:\tNone", )
-    }
-    else{
-
-        console.log("Token Associated:\t", tokenDataJSON["data"]["attributes"]["name"]);
-    }
-}
 
 // Template for a CLI command
 program
     .command("getLatestBlockData")
     .description("")
-    // .option("")
     .action(async () => {
         spinner.start();
         const data = await fetch(base_url+"/blocks/latest");
@@ -82,9 +61,20 @@ program
 program
     .command("getContractDetails <address>")
     .description("Get general details about a contract deployed at the provided address")
-    // .option("")
+    .option("-t, --transactions")
+    .option("-b, --block")
     .action(async (address) => {
-        getContractDetails(address);
+        contract.getDetails(base_url, address, spinner);
+        // if(program.transactions){
+        //     getContractTransactions();
+        // }
+        // else if(program.block){
+
+        // }
+        // else{
+        //     contract.getDetails(address, spinner);
+        // }
+        
     })
 
 async function run(){
