@@ -61,19 +61,21 @@ program
 program
     .command("getContractDetails <address>")
     .description("Get general details about a contract deployed at the provided address")
-    .option("-t, --transactions")
+    .option('-t, --transactions')
     .option("-b, --block")
+    .parse(process.argv)
     .action(async (address) => {
-        contract.getDetails(base_url, address, spinner);
-        // if(program.transactions){
-        //     getContractTransactions();
-        // }
+        //contract.getDetails(base_url, address, spinner);
+        console.log(program.transactions);
+        if(program.transactions){
+            contract.getTransactions(base_url, address, spinner);
+        }
         // else if(program.block){
 
         // }
-        // else{
-        //     contract.getDetails(address, spinner);
-        // }
+        else{
+            contract.getDetails(base_url, address, spinner);
+        }
         
     })
 
