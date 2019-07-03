@@ -67,15 +67,26 @@ program
     .option("-T, --transactionsTo <accTo>", "Show details of transactions made to <accTo> by the contract")
     .parse(process.argv)
     .action(async (address, options) => {
+        if(options.transactionsFrom != undefined && options.transactionsTo != undefined){
+            console.error(chalk.red("Cannot use from & to filters simultaneously!"));
+            return;
+        }
+        
         if(options.transactions != undefined){
-            if(parseInt(options.transactions) > 100 || parseInt(options.transactions) < 0){
-                console.error(chalk.red("Number of transactions cannot be more than 100 at a time or less than 0"));
+            if(parseInt(options.transactions) < 0){
+                console.error(chalk.red("Number of transactions cannot be less than 0"));
                 return;
             }
             contract.getTransactions(base_url, address, options.transactions, spinner);
         }
         else if(options.block){
             contract.getBlock(base_url, address, spinner);
+        }
+        else if(options.transactionsFrom != undefined){
+            contract.getTransactionsFrom(base_url, address, options.transactionsFrom, spinner);
+        }
+        else if(options.transactionsTo != undefined){
+            contract.getTransactionsTo(base_url, address, options.transactionsTo, spinner);
         }
         else{
             contract.getDetails(base_url, address, spinner);

@@ -16,6 +16,15 @@ contract.getDetails = async (base_url, address, spinner) => {
         return;
     }
     let jsonData = await data.json();
+
+    if(jsonData["errors"] != undefined){
+        for(let i = 0; i < jsonData["errors"].length; i++){
+            spinner.stop();
+            console.error(chalk.red("Error " + jsonData["errors"][i]["status"] + ": " + jsonData["errors"][i]["title"]))
+            return;
+        }
+    }
+
     if(jsonData["data"]["relationships"]["token"]["data"] != null){
         tokenData = await fetch(base_url + "/tokens/" + jsonData["data"]["relationships"]["token"]["data"]["id"])
         tokenDataJSON = await tokenData.json();
@@ -36,33 +45,6 @@ contract.getDetails = async (base_url, address, spinner) => {
     }
 }
 
-contract.getTransactions = async (base_url, address, num, spinner) => {
-    spinner.start();
-    let data; 
-    try{   
-        data = await fetch(base_url+`/contracts/${address}/transactions/?page[limit]=${num}`);
-    }
-    catch{
-        spinner.stop()
-        console.log(chalk.red("Error fetching data! Please try again later"));
-        return;
-    };
-    let jsonData = await data.json();
-    spinner.stop();
-    for(i = 0; i < jsonData["meta"]["count"]; i++){
-        console.log("Transaction Hash:\t", jsonData["data"][i]["id"]);
-        console.log("From:\t\t\t", jsonData["data"][i]["relationships"]["from"]["data"]["id"]);
-        console.log("To:\t\t\t", jsonData["data"][i]["relationships"]["to"]["data"]["id"]);
-        console.log("Gas Used:\t\t", jsonData["data"][i]["attributes"]["txGasUsed"]);
-        console.log("Gas Price:\t\t", jsonData["data"][i]["attributes"]["txGasPrice"]);
-        console.log("Transaction Fee:\t", jsonData["data"][i]["attributes"]["fee"]);
-        if(jsonData["data"][i]["attributes"]["msgPayload"] != null){
-            console.log("Function Called:\t", jsonData["data"][i]["attributes"]["msgPayload"]["funcDefinition"]);
-        }
-        console.log(chalk.cyan("---------------------------------------------------------------------------------------------------------"))
-    }
-}
-
 contract.getBlock = async (base_url, address, spinner) => {
     spinner.start();
     let data; 
@@ -76,6 +58,12 @@ contract.getBlock = async (base_url, address, spinner) => {
     };
     let jsonData = await data.json();
     spinner.stop();
+    if(jsonData["errors"] != undefined){
+        for(let i = 0; i < jsonData["errors"].length; i++){
+            console.error(chalk.red("Error " + jsonData["errors"][i]["status"] + ": " + jsonData["errors"][i]["title"]))
+            return;
+        }
+    }
     console.log("Block Number:\t\t", jsonData["data"]["attributes"]["number"]);
     console.log("Block Hash:\t\t", jsonData["data"]["attributes"]["blockHash"]);
     console.log("Creation Time\t\t", moment.unix(parseInt(jsonData["data"]["attributes"]["blockCreationTime"])).local().toString());
@@ -85,4 +73,155 @@ contract.getBlock = async (base_url, address, spinner) => {
     console.log("Block Gas Used:\t\t", jsonData["data"]["attributes"]["blockGasUsed"]);
 }
 
+contract.getTransactions = async (base_url, address, num, spinner) => {
+    let nextPageLink = "";
+    let jsonData;
+    num = parseInt(num);
+    do{
+        spinner.start();
+        let data; 
+        try{   
+            if(num > 100){
+                if(nextPageLink == ""){
+                    data = await fetch(base_url+`/contracts/${address}/transactions/?page[limit]=100`);
+                }
+                else{
+                    data = await fetch(nextPageLink);
+                }
+            }
+            else{
+                if(nextPageLink == ""){
+                    data = await fetch(base_url+`/contracts/${address}/transactions/?page[limit]=` + num.toString());
+                }
+                else{
+                    data = await fetch(nextPageLink.replace("page[limit]=100", "page[limit]="+num.toString()));
+                }
+            }
+            
+        }
+        catch{
+            spinner.stop()
+            console.log(chalk.red("Error fetching data! Please try again later"));
+            return;
+        };
+        jsonData = await data.json();
+        spinner.stop();
+
+        if(jsonData["errors"] != undefined){
+            for(let i = 0; i < jsonData["errors"].length; i++){
+                console.error(chalk.red("Error " + jsonData["errors"][i]["status"] + ": " + jsonData["errors"][i]["title"]))
+                return;
+            }
+        }
+
+        for(i = 0; i < jsonData["meta"]["count"]; i++){
+            console.log("Transaction Hash:\t", jsonData["data"][i]["id"]);
+            console.log("From:\t\t\t", jsonData["data"][i]["relationships"]["from"]["data"]["id"]);
+            console.log("To:\t\t\t", jsonData["data"][i]["relationships"]["to"]["data"]["id"]);
+            console.log("Timestamp:\t\t", moment.unix(parseInt(jsonData["data"][i]["attributes"]["blockCreationTime"])).local().toString());
+            console.log("Gas Used:\t\t", jsonData["data"][i]["attributes"]["txGasUsed"]);
+            console.log("Gas Price:\t\t", jsonData["data"][i]["attributes"]["txGasPrice"]);
+            console.log("Transaction Fee:\t", jsonData["data"][i]["attributes"]["fee"]);
+            if(jsonData["data"][i]["attributes"]["msgPayload"] != null){
+                console.log("Function Called:\t", jsonData["data"][i]["attributes"]["msgPayload"]["funcDefinition"]);
+            }
+            console.log(chalk.cyan("---------------------------------------------------------------------------------------------------------"))
+        }
+        num -= 100;
+        nextPageLink = `${base_url}/contracts/${address}/transactions?page[limit]=100&page` + jsonData["links"]["next"].substring(jsonData["links"]["next"].indexOf("[next]"));
+    }
+    while(num > 0 && jsonData["meta"]["page"]["hasNext"] == true)
+}
+
+contract.getTransactionsFrom = async (base_url, address, account, spinner) => {
+    let nextPageLink = "";
+    let jsonData;
+    do{
+        spinner.start();
+        let data; 
+        try{
+            if(nextPageLink == ""){
+                data = await fetch(`${base_url}/contracts/${address}/transactions?filter[from]=${account}&page[limit]=100`);
+            }   
+            else{
+                data = await fetch(nextPageLink);
+            }
+        }
+        catch{
+            spinner.stop()
+            console.log(chalk.red("Error fetching data! Please try again later"));
+            return;
+        };
+        jsonData = await data.json();
+        spinner.stop();
+
+        if(jsonData["errors"] != undefined){
+            for(let i = 0; i < jsonData["errors"].length; i++){
+                console.error(chalk.red("Error " + jsonData["errors"][i]["status"] + ": " + jsonData["errors"][i]["title"]))
+                return;
+            }
+        }
+
+        for(i = 0; i < jsonData["meta"]["count"]; i++){
+            console.log("Transaction Hash:\t", jsonData["data"][i]["id"]);
+            console.log("Timestamp:\t\t", moment.unix(parseInt(jsonData["data"][i]["attributes"]["blockCreationTime"])).local().toString());
+            console.log("Gas Used:\t\t", jsonData["data"][i]["attributes"]["txGasUsed"]);
+            console.log("Gas Price:\t\t", jsonData["data"][i]["attributes"]["txGasPrice"]);
+            console.log("Transaction Fee:\t", jsonData["data"][i]["attributes"]["fee"]);
+            if(jsonData["data"][i]["attributes"]["msgPayload"] != null){
+                console.log("Function Called:\t", jsonData["data"][i]["attributes"]["msgPayload"]["funcDefinition"]);
+            }
+            console.log(chalk.cyan("---------------------------------------------------------------------------------------------------------"))
+        }
+        nextPageLink = `${base_url}/contracts/${address}/transactions?filter[from]=${account}&page[limit]=100&page` + jsonData["links"]["next"].substring(jsonData["links"]["next"].indexOf("[next]"));
+    }
+    while(jsonData["meta"]["page"]["hasNext"] == true);
+    
+}
+
+contract.getTransactionsTo = async (base_url, address, account, spinner) => {
+    let nextPageLink = "";
+    let jsonData;
+    do{
+        spinner.start();
+        let data; 
+        try{
+            if(nextPageLink == ""){
+                data = await fetch(`${base_url}/contracts/${address}/transactions?filter[to]=${account}&page[limit]=100`);
+            }   
+            else{
+                data = await fetch(nextPageLink);
+            }
+        }
+        catch{
+            spinner.stop()
+            console.log(chalk.red("Error fetching data! Please try again later"));
+            return;
+        };
+        jsonData = await data.json();
+        spinner.stop();
+
+        if(jsonData["errors"] != undefined){
+            for(let i = 0; i < jsonData["errors"].length; i++){
+                console.error(chalk.red("Error " + jsonData["errors"][i]["status"] + ": " + jsonData["errors"][i]["title"]))
+                return;
+            }
+        }
+
+        for(i = 0; i < jsonData["meta"]["count"]; i++){
+            console.log("Transaction Hash:\t", jsonData["data"][i]["id"]);
+            console.log("Timestamp:\t\t", moment.unix(parseInt(jsonData["data"][i]["attributes"]["blockCreationTime"])).local().toString());
+            console.log("Gas Used:\t\t", jsonData["data"][i]["attributes"]["txGasUsed"]);
+            console.log("Gas Price:\t\t", jsonData["data"][i]["attributes"]["txGasPrice"]);
+            console.log("Transaction Fee:\t", jsonData["data"][i]["attributes"]["fee"]);
+            if(jsonData["data"][i]["attributes"]["msgPayload"] != null){
+                console.log("Function Called:\t", jsonData["data"][i]["attributes"]["msgPayload"]["funcDefinition"]);
+            }
+            console.log(chalk.cyan("---------------------------------------------------------------------------------------------------------"))
+        }
+        nextPageLink = `${base_url}/contracts/${address}/transactions?filter[to]=${account}&page[limit]=100&page` + jsonData["links"]["next"].substring(jsonData["links"]["next"].indexOf("[next]"));
+    }
+    while(jsonData["meta"]["page"]["hasNext"] == true);
+    
+}
 module.exports = contract;
