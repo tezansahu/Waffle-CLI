@@ -63,6 +63,7 @@ program
     .description("Get general details about a contract deployed at the provided address")
     .option('-t, --transactions <num>', "Show details about <num> latest transactions to/from the contract")
     .option("-b, --block", "Show details about the block where the contract was created")
+    .option("-c, --creationTxn", "Show details about the Contract Creation Transaction")
     .option("-f, --transactionsFrom <accFrom>", "Show details of transactions made from <accFrom> to the contract")
     .option("-T, --transactionsTo <accTo>", "Show details of transactions made to <accTo> by the contract")
     .parse(process.argv)
@@ -71,7 +72,7 @@ program
             console.error(chalk.red("Cannot use from & to filters simultaneously!"));
             return;
         }
-        
+
         if(options.transactions != undefined){
             if(parseInt(options.transactions) < 0){
                 console.error(chalk.red("Number of transactions cannot be less than 0"));
@@ -81,6 +82,9 @@ program
         }
         else if(options.block){
             contract.getBlock(base_url, address, spinner);
+        }
+        else if(options.creationTxn){
+            contract.getCreationTxn(base_url, address, spinner);
         }
         else if(options.transactionsFrom != undefined){
             contract.getTransactionsFrom(base_url, address, options.transactionsFrom, spinner);
