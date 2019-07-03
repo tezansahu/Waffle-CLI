@@ -11,6 +11,7 @@ const ora = require('ora');
 
 
 const contract = require("./modules/contractUtils");
+const transaction = require("./modules/transactionUtils");
 
 const spinner = ora('Fetching data from aleth.io');
 let base_url;
@@ -18,6 +19,10 @@ let base_url;
 // {"API_KEY":"main_k5ua5idae7skpuciub5afanpxys3q"}
 
 // ---------------------Define functions necessary for the CLI Tool-------------------------------
+
+///////////////////////////////////////////////////////////////////////////////////
+// Check if API Key of the user exists. If not, store the API Key for future use //
+///////////////////////////////////////////////////////////////////////////////////
 async function checkAPIkey(){
     return new Promise(async resolve => {
         fs.readFile("./apiKey.json", "utf8", async (err, jsonString) => {
@@ -47,19 +52,11 @@ async function checkAPIkey(){
 }
 
 
-// Template for a CLI command
+////////////////////////////////////////////////////////
+// Command to query details about a specific contract //
+////////////////////////////////////////////////////////
 program
-    .command("getLatestBlockData")
-    .description("")
-    .action(async () => {
-        spinner.start();
-        const data = await fetch(base_url+"/blocks/latest");
-        spinner.stop();
-        console.log(await data.json());
-    })
-
-program
-    .command("getContractDetails <address>")
+    .command("contract <address>")
     .description("Get general details about a contract deployed at the provided address")
     .option('-t, --transactions <num>', "Show details about <num> latest transactions to/from the contract")
     .option("-b, --block", "Show details about the block where the contract was created")
@@ -120,6 +117,18 @@ program
     })
     
 
+
+program
+    .command("transaction <hash>")
+    .description("Get general details about the transaction given by the hash")
+    // .options()
+    .parse(process.argv)
+    .action(async (hash) => {
+        transaction.getDetails(base_url, hash, spinner);
+    })
+/////////////////////////////////////////////////////////////////////////////////////////
+// Parse the command (& options) entered by the user and call the appropriate function //
+/////////////////////////////////////////////////////////////////////////////////////////
 async function run(){
     clear();
     console.log(

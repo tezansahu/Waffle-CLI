@@ -4,6 +4,9 @@ require("isomorphic-fetch");
 
 let contract = {}
 
+////////////////////////////////////////////
+// Get generic details about the contract //
+////////////////////////////////////////////
 contract.getDetails = async (base_url, address, spinner) => {
     spinner.start();
     let data;
@@ -45,6 +48,10 @@ contract.getDetails = async (base_url, address, spinner) => {
     }
 }
 
+
+///////////////////////////////////////////////////////////////
+// Get details about the block where the contract is included//
+///////////////////////////////////////////////////////////////
 contract.getBlock = async (base_url, address, spinner) => {
     spinner.start();
     let data; 
@@ -73,6 +80,10 @@ contract.getBlock = async (base_url, address, spinner) => {
     console.log("Block Gas Used:\t\t", jsonData["data"]["attributes"]["blockGasUsed"]);
 }
 
+
+////////////////////////////////////////////////////////
+// Get details about the contract creation transaction//
+////////////////////////////////////////////////////////
 contract.getCreationTxn = async (base_url, address, spinner) => {
     spinner.start();
     let data; 
@@ -102,6 +113,10 @@ contract.getCreationTxn = async (base_url, address, spinner) => {
     console.log("Transaction Fee:\t", (parseInt(jsonData["data"]["attributes"]["fee"])*Math.pow(10, -18)).toString(), "ETH");
 }
 
+
+//////////////////////////////////////////////////////////////////
+// Get details about the transactions made to/from the contract //
+//////////////////////////////////////////////////////////////////
 contract.getTransactions = async (base_url, address, num, spinner) => {
     let nextPageLink = "";
     let jsonData;
@@ -151,7 +166,7 @@ contract.getTransactions = async (base_url, address, num, spinner) => {
             console.log("Gas Used:\t\t", jsonData["data"][i]["attributes"]["txGasUsed"]);
             console.log("Gas Price:\t\t", jsonData["data"][i]["attributes"]["txGasPrice"], "Wei");
             console.log("Transaction Fee:\t", (parseInt(jsonData["data"][i]["attributes"]["fee"])*Math.pow(10, -18)).toString(), "ETH");            if(jsonData["data"][i]["attributes"]["msgPayload"] != null){
-                console.log("Function Called:\t", jsonData["data"][i]["attributes"]["msgPayload"]["funcDefinition"]);
+            console.log("Function Called:\t", jsonData["data"][i]["attributes"]["msgPayload"]["funcDefinition"]);
             }
             console.log(chalk.cyan("---------------------------------------------------------------------------------------------------------"))
         }
@@ -161,6 +176,10 @@ contract.getTransactions = async (base_url, address, num, spinner) => {
     while(num > 0 && jsonData["meta"]["page"]["hasNext"] == true)
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////
+// Get details about the transactions made from a specific account to the contract //
+/////////////////////////////////////////////////////////////////////////////////////
 contract.getTransactionsFrom = async (base_url, address, account, spinner) => {
     let nextPageLink = "";
     let jsonData;
@@ -206,6 +225,9 @@ contract.getTransactionsFrom = async (base_url, address, account, spinner) => {
     
 }
 
+/////////////////////////////////////////////////////////////////////////////////////
+// Get details about the transactions made to a specific account from the contract //
+/////////////////////////////////////////////////////////////////////////////////////
 contract.getTransactionsTo = async (base_url, address, account, spinner) => {
     let nextPageLink = "";
     let jsonData;
