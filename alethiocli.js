@@ -74,9 +74,9 @@ program
             }
             contract.getTransactions(base_url, address, options.transactions, spinner);
         }
-        // else if(program.block){
-
-        // }
+        else if(options.block){
+            contract.getBlock(base_url, address, spinner);
+        }
         else{
             contract.getDetails(base_url, address, spinner);
         }
