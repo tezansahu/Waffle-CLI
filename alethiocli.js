@@ -11,6 +11,7 @@ const ora = require('ora');
 
 
 const contract = require("./modules/contractUtils");
+const transaction = require("./modules/transactionUtils");
 
 const spinner = ora('Fetching data from aleth.io');
 let base_url;
@@ -55,7 +56,7 @@ async function checkAPIkey(){
 // Command to query details about a specific contract //
 ////////////////////////////////////////////////////////
 program
-    .command("getContractDetails <address>")
+    .command("contract <address>")
     .description("Get general details about a contract deployed at the provided address")
     .option('-t, --transactions <num>', "Show details about <num> latest transactions to/from the contract")
     .option("-b, --block", "Show details about the block where the contract was created")
@@ -95,6 +96,14 @@ program
     })
 
 
+program
+    .command("transaction <hash>")
+    .description("Get general details about the transaction given by the hash")
+    // .options()
+    .parse(process.argv)
+    .action(async (hash) => {
+        transaction.getDetails(base_url, hash, spinner);
+    })
 /////////////////////////////////////////////////////////////////////////////////////////
 // Parse the command (& options) entered by the user and call the appropriate function //
 /////////////////////////////////////////////////////////////////////////////////////////

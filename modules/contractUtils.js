@@ -166,7 +166,7 @@ contract.getTransactions = async (base_url, address, num, spinner) => {
             console.log("Gas Used:\t\t", jsonData["data"][i]["attributes"]["txGasUsed"]);
             console.log("Gas Price:\t\t", jsonData["data"][i]["attributes"]["txGasPrice"], "Wei");
             console.log("Transaction Fee:\t", (parseInt(jsonData["data"][i]["attributes"]["fee"])*Math.pow(10, -18)).toString(), "ETH");            if(jsonData["data"][i]["attributes"]["msgPayload"] != null){
-                console.log("Function Called:\t", jsonData["data"][i]["attributes"]["msgPayload"]["funcDefinition"]);
+            console.log("Function Called:\t", jsonData["data"][i]["attributes"]["msgPayload"]["funcDefinition"]);
             }
             console.log(chalk.cyan("---------------------------------------------------------------------------------------------------------"))
         }
