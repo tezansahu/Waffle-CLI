@@ -98,6 +98,28 @@ program
         
     })
 
+program
+    .command("checkHashType <hash>")
+    .description("Checks whether the provided hash is an external account, contract account, txn or a block hash")
+    .action(async (hash) => {
+        spinner.start();
+        const e = await fetch(base_url+`/accounts/${hash}`);
+        const c = await fetch(base_url+`/contracts/${hash}`);
+        const t = await fetch(base_url+`/transactions/${hash}`);
+        const b = await fetch(base_url+`/blocks/${hash}`);
+        spinner.stop();
+        let es = (await e.status);
+        let cs = (await c.status);
+        let ts = (await t.status);
+        let bs = (await b.status);
+
+        if(es == 200 && cs == 200) console.log('Contract Account');
+        else if (es == 200) console.log('External(User) Account')
+        else if (ts == 200) console.log('Transaction')
+        else if (bs == 200) console.log('Block Hash')
+    })
+    
+
 async function run(){
     clear();
     console.log(

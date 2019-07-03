@@ -250,4 +250,7 @@ contract.getTransactionsTo = async (base_url, address, account, spinner) => {
     while(jsonData["meta"]["page"]["hasNext"] == true);
     
 }
+
+
+
 module.exports = contract;
