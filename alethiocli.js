@@ -18,6 +18,10 @@ let base_url;
 // {"API_KEY":"main_k5ua5idae7skpuciub5afanpxys3q"}
 
 // ---------------------Define functions necessary for the CLI Tool-------------------------------
+
+///////////////////////////////////////////////////////////////////////////////////
+// Check if API Key of the user exists. If not, store the API Key for future use //
+///////////////////////////////////////////////////////////////////////////////////
 async function checkAPIkey(){
     return new Promise(async resolve => {
         fs.readFile("./apiKey.json", "utf8", async (err, jsonString) => {
@@ -47,17 +51,9 @@ async function checkAPIkey(){
 }
 
 
-// Template for a CLI command
-program
-    .command("getLatestBlockData")
-    .description("")
-    .action(async () => {
-        spinner.start();
-        const data = await fetch(base_url+"/blocks/latest");
-        spinner.stop();
-        console.log(await data.json());
-    })
-
+////////////////////////////////////////////////////////
+// Command to query details about a specific contract //
+////////////////////////////////////////////////////////
 program
     .command("getContractDetails <address>")
     .description("Get general details about a contract deployed at the provided address")
@@ -98,6 +94,10 @@ program
         
     })
 
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Parse the command (& options) entered by the user and call the appropriate function //
+/////////////////////////////////////////////////////////////////////////////////////////
 async function run(){
     clear();
     console.log(
