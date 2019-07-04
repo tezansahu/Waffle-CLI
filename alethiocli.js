@@ -12,6 +12,7 @@ const ora = require('ora');
 
 const contract = require("./modules/contractUtils");
 const transaction = require("./modules/transactionUtils");
+const account = require("./modules/accountUtils");
 
 const spinner = ora('Fetching data from aleth.io');
 let base_url;
@@ -137,6 +138,16 @@ program
     .parse(process.argv)
     .action(async (hash) => {
         transaction.getDetails(base_url, hash, spinner);
+    })
+
+
+program
+    .command("account <address>")
+    .description("Get general details about the account address")
+    // .options()
+    .parse(process.argv)
+    .action(async (address) => {
+        account.getDetails(base_url, address, spinner);
     })
 
 
