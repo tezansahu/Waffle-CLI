@@ -65,7 +65,9 @@ program
     .option("-f, --transactionsFrom <accFrom>", "Show details of transactions made from <accFrom> to the contract")
     .option("-T, --transactionsTo <accTo>", "Show details of transactions made to <accTo> by the contract")
     .option("-T, --transactionsTo <accTo>", "Show details of transactions made to <accTo> by the contract")
+    .option("-m, --messages <num>", "Show details about <num> latest Contract Messages (Internal Transactions)")
     .action(async (address, options) => {
+        await contract.getDetails(base_url, address, spinner);
         if(options.transactionsFrom != undefined && options.transactionsTo != undefined){
             console.error(chalk.red("Cannot use from & to filters simultaneously!"));
             return;
@@ -76,24 +78,27 @@ program
                 console.error(chalk.red("Number of transactions cannot be less than 0"));
                 return;
             }
-            contract.getTransactions(base_url, address, options.transactions, spinner);
-        }
-        else if(options.block){
-            contract.getBlock(base_url, address, spinner);
-        }
-        else if(options.creationTxn){
-            contract.getCreationTxn(base_url, address, spinner);
-        }
-        else if(options.transactionsFrom != undefined){
-            contract.getTransactionsFrom(base_url, address, options.transactionsFrom, spinner);
-        }
-        else if(options.transactionsTo != undefined){
-            contract.getTransactionsTo(base_url, address, options.transactionsTo, spinner);
-        }
-        else{
-            contract.getDetails(base_url, address, spinner);
+            await contract.getTransactions(base_url, address, options.transactions, spinner);
         }
         
+        if(options.block){
+            await contract.getBlock(base_url, address, spinner);
+        }
+        
+        if(options.creationTxn){
+            await contract.getCreationTxn(base_url, address, spinner);
+        }
+        
+        if(options.transactionsFrom != undefined){
+            await contract.getTransactionsFrom(base_url, address, options.transactionsFrom, spinner);
+        }
+        else if(options.transactionsTo != undefined){
+            await contract.getTransactionsTo(base_url, address, options.transactionsTo, spinner);
+        }
+
+        if(options.messages != undefined){
+            await contract.getMessages(base_url, address, options.messages, spinner);
+        }
     })
 
 program
