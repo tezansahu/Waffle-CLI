@@ -13,6 +13,7 @@ const ora = require('ora');
 const contract = require("./modules/contractUtils");
 const transaction = require("./modules/transactionUtils");
 const account = require("./modules/accountUtils");
+const block = require("./modules/blockUtils");
 
 const spinner = ora('Fetching data from aleth.io');
 let base_url;
@@ -150,6 +151,15 @@ program
         account.getDetails(base_url, address, spinner);
     })
 
+
+program
+    .command("block <hash>")
+    .description("Get general details about the block given by the block hash")
+    // .options()
+    .parse(process.argv)
+    .action(async (hash) => {
+        block.getDetails(base_url, hash, spinner);
+    })
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Parse the command (& options) entered by the user and call the appropriate function //
