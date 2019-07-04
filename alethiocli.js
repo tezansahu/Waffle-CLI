@@ -64,7 +64,7 @@ program
     .option("-c, --creationTxn", "Show details about the Contract Creation Transaction")
     .option("-f, --transactionsFrom <accFrom>", "Show details of transactions made from <accFrom> to the contract")
     .option("-T, --transactionsTo <accTo>", "Show details of transactions made to <accTo> by the contract")
-    .parse(process.argv)
+    .option("-T, --transactionsTo <accTo>", "Show details of transactions made to <accTo> by the contract")
     .action(async (address, options) => {
         if(options.transactionsFrom != undefined && options.transactionsTo != undefined){
             console.error(chalk.red("Cannot use from & to filters simultaneously!"));
@@ -135,7 +135,6 @@ program
     .command("transaction <hash>")
     .description("Get general details about the transaction given by the hash")
     // .options()
-    .parse(process.argv)
     .action(async (hash) => {
         transaction.getDetails(base_url, hash, spinner);
     })
@@ -145,12 +144,18 @@ program
     .command("account <address>")
     .description("Get general details about the account address")
     // .options()
-    .parse(process.argv)
     .action(async (address) => {
         account.getDetails(base_url, address, spinner);
     })
 
 
+program.on("--help", function(){
+    console.log("\n");
+    console.log(chalk.italic.cyan("This is a CLI tool for Ethereum Developers, created by Tezan Sahu & Smit Rajput, using Aleth.io\n"));
+})
+
+
+// program.parse(process.argv)
 /////////////////////////////////////////////////////////////////////////////////////////
 // Parse the command (& options) entered by the user and call the appropriate function //
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +169,7 @@ async function run(){
     let api_key_verified = await checkAPIkey();
     if(api_key_verified == true){
         program
-        .version('0.1.0')
+        .version("0.0.1")
         .parse(process.argv)
     }
 }
