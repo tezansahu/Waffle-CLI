@@ -110,10 +110,22 @@ program
         let ts = (await t.status);
         let bs = (await b.status);
 
-        if(es == 200 && cs == 200) console.log('Contract Account');
-        else if (es == 200) console.log('External(User) Account')
-        else if (ts == 200) console.log('Transaction')
-        else if (bs == 200) console.log('Block Hash')
+        if(es == 200 && cs == 200) {
+            console.log(chalk.bold.cyan('Contract Account'));
+            console.log(`Use ` + chalk.italic.yellow(`'alethiocli contract ${hash} [options]'`) +` to get more details\n`);
+        }
+        else if (es == 200) {
+            console.log(chalk.bold.cyan('External(User) Account'));
+            console.log(`Use ` + chalk.italic.yellow(`'alethiocli account ${hash} [options]'`) +` to get more details\n`);
+        }
+        else if (ts == 200) {
+            console.log(chalk.bold.cyan('Transaction'));
+            console.log(`Use ` + chalk.italic.yellow(`'alethiocli transaction ${hash} [options]'`) +` to get more details\n`);
+        }
+        else if (bs == 200) {
+            console.log(chalk.bold.cyan('Block Hash'));
+            console.log(`Use ` + chalk.italic.yellow(`'alethiocli block ${hash} [options]'`) +` to get more details\n`);
+        }
     })
     
 
@@ -126,6 +138,8 @@ program
     .action(async (hash) => {
         transaction.getDetails(base_url, hash, spinner);
     })
+
+
 /////////////////////////////////////////////////////////////////////////////////////////
 // Parse the command (& options) entered by the user and call the appropriate function //
 /////////////////////////////////////////////////////////////////////////////////////////
