@@ -65,8 +65,11 @@ program
     .option("-c, --creationTxn", "Show details about the Contract Creation Transaction")
     .option("-f, --transactionsFrom <accFrom>", "Show details of transactions made from <accFrom> to the contract")
     .option("-T, --transactionsTo <accTo>", "Show details of transactions made to <accTo> by the contract")
-    .parse(process.argv)
+    .option("-T, --transactionsTo <accTo>", "Show details of transactions made to <accTo> by the contract")
+    .option("-m, --messages <num>", "Show details about <num> latest Contract Messages (Internal Transactions)")
+    .option("-l, --logs <num>", "Show details about <num> latest Log Entries (Events) associated with the contract")
     .action(async (address, options) => {
+        await contract.getDetails(base_url, address, spinner);
         if(options.transactionsFrom != undefined && options.transactionsTo != undefined){
             console.error(chalk.red("Cannot use from & to filters simultaneously!"));
             return;
@@ -77,24 +80,31 @@ program
                 console.error(chalk.red("Number of transactions cannot be less than 0"));
                 return;
             }
-            contract.getTransactions(base_url, address, options.transactions, spinner);
-        }
-        else if(options.block){
-            contract.getBlock(base_url, address, spinner);
-        }
-        else if(options.creationTxn){
-            contract.getCreationTxn(base_url, address, spinner);
-        }
-        else if(options.transactionsFrom != undefined){
-            contract.getTransactionsFrom(base_url, address, options.transactionsFrom, spinner);
-        }
-        else if(options.transactionsTo != undefined){
-            contract.getTransactionsTo(base_url, address, options.transactionsTo, spinner);
-        }
-        else{
-            contract.getDetails(base_url, address, spinner);
+            await contract.getTransactions(base_url, address, options.transactions, spinner);
         }
         
+        if(options.block){
+            await contract.getBlock(base_url, address, spinner);
+        }
+        
+        if(options.creationTxn){
+            await contract.getCreationTxn(base_url, address, spinner);
+        }
+        
+        if(options.transactionsFrom != undefined){
+            await contract.getTransactionsFrom(base_url, address, options.transactionsFrom, spinner);
+        }
+        else if(options.transactionsTo != undefined){
+            await contract.getTransactionsTo(base_url, address, options.transactionsTo, spinner);
+        }
+
+        if(options.messages != undefined){
+            await contract.getMessages(base_url, address, options.messages, spinner);
+        }
+
+        if(options.logs != undefined){
+            await contract.getLogEntries(base_url, address, options.logs, spinner);
+        }
     })
 
 program
@@ -136,7 +146,6 @@ program
     .command("transaction <hash>")
     .description("Get general details about the transaction given by the hash")
     // .options()
-    .parse(process.argv)
     .action(async (hash) => {
         transaction.getDetails(base_url, hash, spinner);
     })
@@ -146,7 +155,6 @@ program
     .command("account <address>")
     .description("Get general details about the account address")
     // .options()
-    .parse(process.argv)
     .action(async (address) => {
         account.getDetails(base_url, address, spinner);
     })
@@ -161,6 +169,13 @@ program
         block.getDetails(base_url, hash, spinner);
     })
 
+program.on("--help", function(){
+    console.log("\n");
+    console.log(chalk.italic.cyan("This is a CLI tool for Ethereum Developers, created by Tezan Sahu & Smit Rajput, using Aleth.io\n"));
+})
+
+
+// program.parse(process.argv)
 /////////////////////////////////////////////////////////////////////////////////////////
 // Parse the command (& options) entered by the user and call the appropriate function //
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +189,7 @@ async function run(){
     let api_key_verified = await checkAPIkey();
     if(api_key_verified == true){
         program
-        .version('0.1.0')
+        .version("0.0.1")
         .parse(process.argv)
     }
 }

@@ -30,7 +30,9 @@ transaction.getDetails = async (base_url, hash, spinner) => {
     }
 
     // console.log(jsonData["data"]["attributes"]["msgPayload"]);
-
+    console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
+    console.log(chalk.bold.cyan("Transaction Details"))
+    console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
     console.log("Transaction Hash:\t", jsonData["data"]["attributes"]["txHash"]);
     console.log("From:\t\t\t", jsonData["data"]["relationships"]["from"]["data"]["id"]);
     console.log("To:\t\t\t", jsonData["data"]["relationships"]["to"]["data"]["id"]);
@@ -46,7 +48,7 @@ transaction.getDetails = async (base_url, hash, spinner) => {
     if(jsonData["data"]["attributes"]["msgPayload"]["raw"] != ""){
         console.log("Raw Data Payload:\t", jsonData["data"]["attributes"]["msgPayload"]["raw"]);
     }
-    
+    console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
 }
 
 module.exports = transaction;
