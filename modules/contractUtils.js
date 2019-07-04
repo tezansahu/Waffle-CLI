@@ -305,9 +305,9 @@ contract.getTransactionsTo = async (base_url, address, account, spinner) => {
 }
 
 
-//////////////////////////////////////////////////////////////////
-// Get details about the transactions made to/from the contract //
-//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+// Get details about the contract messages associated with the contract //
+//////////////////////////////////////////////////////////////////////////
 contract.getMessages = async (base_url, address, num, spinner) => {
     let nextPageLink = "";
     let jsonData;
@@ -373,6 +373,79 @@ contract.getMessages = async (base_url, address, num, spinner) => {
         }
         num -= 100;
         nextPageLink = `${base_url}/contracts/${address}/contractMessages?page[limit]=100&page` + jsonData["links"]["next"].substring(jsonData["links"]["next"].indexOf("[next]"));
+    }
+    while(num > 0 && jsonData["meta"]["page"]["hasNext"] == true)
+    console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Get details about the log entries (events) triggered by the contract //
+//////////////////////////////////////////////////////////////////////////
+contract.getLogEntries = async (base_url, address, num, spinner) => {
+    let nextPageLink = "";
+    let jsonData;
+    num = parseInt(num);
+    do{
+        spinner.start();
+        let data; 
+        try{   
+            if(num > 100){
+                if(nextPageLink == ""){
+                    data = await fetch(base_url+`/contracts/${address}/logEntries/?page[limit]=100`);
+                }
+                else{
+                    data = await fetch(nextPageLink);
+                }
+            }
+            else{
+                if(nextPageLink == ""){
+                    data = await fetch(base_url+`/contracts/${address}/logEntries/?page[limit]=` + num.toString());
+                }
+                else{
+                    data = await fetch(nextPageLink.replace("page[limit]=100", "page[limit]="+num.toString()));
+                }
+            }
+            
+        }
+        catch{
+            spinner.stop()
+            console.log(chalk.red("Error fetching data! Please try again later"));
+            return;
+        };
+        jsonData = await data.json();
+        spinner.stop();
+
+        if(jsonData["errors"] != undefined){
+            for(let i = 0; i < jsonData["errors"].length; i++){
+                console.error(chalk.red("Error " + jsonData["errors"][i]["status"] + ": " + jsonData["errors"][i]["title"]))
+                return;
+            }
+        }
+        if(nextPageLink == ""){
+            console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
+            console.log(chalk.bold.cyan("Contract Log Entries"))
+            console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
+        }
+        
+        for(i = 0; i < jsonData["meta"]["count"]; i++){
+            if(jsonData["data"][i]["attributes"]["eventDecoded"]["event"] != ""){
+                console.log("Event Triggered:\t", jsonData["data"][i]["attributes"]["eventDecoded"]["event"]);
+            }
+            console.log("Event (Topic0):\t\t", jsonData["data"][i]["attributes"]["eventDecoded"]["topic0"])
+            for(j = 0; j < jsonData["data"][i]["attributes"]["eventDecoded"]["inputs"].length; j++){
+                let input = jsonData["data"][i]["attributes"]["eventDecoded"]["inputs"][j];
+                console.log(`Input ${j+1}:\t\t`, `${input["value"]}\t[${input["name"]} (${input["type"]})]`);
+            }
+            console.log("Logged By (Contract):\t", jsonData["data"][i]["relationships"]["loggedBy"]["data"]["id"]);
+            console.log("Parent Transaction:\t", jsonData["data"][i]["relationships"]["transaction"]["data"]["id"])
+            console.log("Block Included:\t\t", jsonData["data"][i]["relationships"]["block"]["data"]["id"])
+            if(jsonData["data"][i]["relationships"]["contractMessage"]["data"] != null){
+                console.log("Contract Message Hash:\t", jsonData["data"][i]["relationships"]["contractMessage"]["data"]["id"].replace("msg:", "").substring(0, 66));
+            }
+            console.log(chalk.cyan("---------------------------------------------------------------------------------------------------------"))
+        }
+        num -= 100;
+        nextPageLink = `${base_url}/contracts/${address}/logEntries?page[limit]=100&page` + jsonData["links"]["next"].substring(jsonData["links"]["next"].indexOf("[next]"));
     }
     while(num > 0 && jsonData["meta"]["page"]["hasNext"] == true)
     console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))

@@ -66,6 +66,7 @@ program
     .option("-T, --transactionsTo <accTo>", "Show details of transactions made to <accTo> by the contract")
     .option("-T, --transactionsTo <accTo>", "Show details of transactions made to <accTo> by the contract")
     .option("-m, --messages <num>", "Show details about <num> latest Contract Messages (Internal Transactions)")
+    .option("-l, --logs <num>", "Show details about <num> latest Log Entries (Events) associated with the contract")
     .action(async (address, options) => {
         await contract.getDetails(base_url, address, spinner);
         if(options.transactionsFrom != undefined && options.transactionsTo != undefined){
@@ -98,6 +99,10 @@ program
 
         if(options.messages != undefined){
             await contract.getMessages(base_url, address, options.messages, spinner);
+        }
+
+        if(options.logs != undefined){
+            await contract.getLogEntries(base_url, address, options.logs, spinner);
         }
     })
 
