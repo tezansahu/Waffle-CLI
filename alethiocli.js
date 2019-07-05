@@ -60,14 +60,20 @@ async function checkAPIkey(){
 program
     .command("contract <address>")
     .description("Get general details about a contract deployed at the provided address")
-    .option('-t, --transactions <num>', "Show details about <num> latest transactions to/from the contract")
     .option("-b, --block", "Show details about the block where the contract was created")
     .option("-c, --creationTxn", "Show details about the Contract Creation Transaction")
-    .option("-f, --transactionsFrom <accFrom>", "Show details of transactions made from <accFrom> to the contract")
-    .option("-T, --transactionsTo <accTo>", "Show details of transactions made to <accTo> by the contract")
-    .option("-T, --transactionsTo <accTo>", "Show details of transactions made to <accTo> by the contract")
-    .option("-m, --messages <num>", "Show details about <num> latest Contract Messages (Internal Transactions)")
-    .option("-l, --logs <num>", "Show details about <num> latest Log Entries (Events) associated with the contract")
+    .option("-e, --event <event_signature>", "Aggregate events logged with the same <event_signature> (See example)")
+    .option("-f, --transactionsFrom <account>", "Show details of transactions made from <account> to the contract")
+    .option("-l, --logs", "Show details about <num> latest Log Entries (Events) associated with the contract")
+    .option("-m, --messages", "Show details about <num> latest Contract Messages (Internal Transactions)")
+    .option("-n, --number <num>", "Limit the search of transactions, messages, event logs, etc. to <num> latest entries")
+    .option('-t, --transactions', "Show details about <num> latest transactions to/from the contract")
+    .option("-T, --transactionsTo <account>", "Show details of transactions made to <account> by the contract")
+    .on("--help", async () => {
+        console.log("\nNote: " + chalk.italic("Without the '-n' flag, the default number of transaction, messages, or events logs is 10"));
+        console.log("\nExamples:");
+        console.log("   $ alethiocli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -e 'Transfer(address,address,value)' -n 50");
+    })
     .action(async (address, options) => {
         await contract.getDetails(base_url, address, spinner);
         if(options.transactionsFrom != undefined && options.transactionsTo != undefined){
@@ -75,12 +81,12 @@ program
             return;
         }
 
-        if(options.transactions != undefined){
-            if(parseInt(options.transactions) < 0){
+        if(options.transactions){
+            if(options.number != undefined && parseInt(options.number) < 0){
                 console.error(chalk.red("Number of transactions cannot be less than 0"));
                 return;
             }
-            await contract.getTransactions(base_url, address, options.transactions, spinner);
+            await contract.getTransactions(base_url, address, options.number || 10, spinner);
         }
         
         if(options.block){
@@ -91,31 +97,37 @@ program
             await contract.getCreationTxn(base_url, address, spinner);
         }
         
-        if(options.transactionsFrom != undefined){
-            await contract.getTransactionsFrom(base_url, address, options.transactionsFrom, spinner);
+        if(options.transactionsFrom){
+            await contract.getTransactionsFrom(base_url, address, options.number || 10, spinner);
         }
-        else if(options.transactionsTo != undefined){
-            await contract.getTransactionsTo(base_url, address, options.transactionsTo, spinner);
-        }
-
-        if(options.messages != undefined){
-            await contract.getMessages(base_url, address, options.messages, spinner);
+        else if(options.transactionsTo){
+            await contract.getTransactionsTo(base_url, address, options.number || 10, spinner);
         }
 
-        if(options.logs != undefined){
-            await contract.getLogEntries(base_url, address, options.logs, spinner);
+        if(options.messages){
+            await contract.getMessages(base_url, address, options.number || 10, spinner);
         }
+
+        if(options.logs){
+            await contract.getLogEntries(base_url, address, options.number || 10, spinner);
+        }
+
+        if(options.event != undefined){
+            await contract.aggregateEventBySignature(base_url, address, options.event, options.number || 10, spinner);
+        }
+
+
     })
 
 program
-    .command("checkHashType <hash>")
-    .description("Checks whether the provided hash is an external account, contract account, txn or a block hash")
-    .action(async (hash) => {
+    .command("search <query>")
+    .description("Checks whether the queried entity is an external account, contract account, transaction or a block hash")
+    .action(async (query) => {
         spinner.start();
-        const e = await fetch(base_url+`/accounts/${hash}`);
-        const c = await fetch(base_url+`/contracts/${hash}`);
-        const t = await fetch(base_url+`/transactions/${hash}`);
-        const b = await fetch(base_url+`/blocks/${hash}`);
+        const e = await fetch(base_url+`/accounts/${query}`);
+        const c = await fetch(base_url+`/contracts/${query}`);
+        const t = await fetch(base_url+`/transactions/${query}`);
+        const b = await fetch(base_url+`/blocks/${query}`);
         spinner.stop();
         let es = (await e.status);
         let cs = (await c.status);
@@ -124,19 +136,22 @@ program
 
         if(es == 200 && cs == 200) {
             console.log(chalk.bold.cyan('Contract Account'));
-            console.log(`Use ` + chalk.italic.yellow(`'alethiocli contract ${hash} [options]'`) +` to get more details\n`);
+            console.log(`Use ` + chalk.italic.yellow(`'alethiocli contract ${query} [options]'`) +` to get more details\n`);
         }
         else if (es == 200) {
             console.log(chalk.bold.cyan('External(User) Account'));
-            console.log(`Use ` + chalk.italic.yellow(`'alethiocli account ${hash} [options]'`) +` to get more details\n`);
+            console.log(`Use ` + chalk.italic.yellow(`'alethiocli account ${query} [options]'`) +` to get more details\n`);
         }
         else if (ts == 200) {
             console.log(chalk.bold.cyan('Transaction'));
-            console.log(`Use ` + chalk.italic.yellow(`'alethiocli transaction ${hash} [options]'`) +` to get more details\n`);
+            console.log(`Use ` + chalk.italic.yellow(`'alethiocli transaction ${query} [options]'`) +` to get more details\n`);
         }
         else if (bs == 200) {
             console.log(chalk.bold.cyan('Block Hash'));
-            console.log(`Use ` + chalk.italic.yellow(`'alethiocli block ${hash} [options]'`) +` to get more details\n`);
+            console.log(`Use ` + chalk.italic.yellow(`'alethiocli block ${query} [options]'`) +` to get more details\n`);
+        }
+        else{
+            console.error(chalk.red("Error: Incorrect query!\n"))
         }
     })
     
@@ -164,7 +179,6 @@ program
     .command("block <hash>")
     .description("Get general details about the block given by the block hash")
     // .options()
-    .parse(process.argv)
     .action(async (hash) => {
         block.getDetails(base_url, hash, spinner);
     })
