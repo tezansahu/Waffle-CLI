@@ -1,14 +1,16 @@
 const moment = require("moment");
 const chalk = require("chalk");
 const keccak256 = require("keccak256");
+const ora = require('ora');
 require("isomorphic-fetch");
 
+const spinner = ora('Fetching data from aleth.io');
 let contract = {}
 
 ////////////////////////////////////////////
 // Get generic details about the contract //
 ////////////////////////////////////////////
-contract.getDetails = async (base_url, address, spinner) => {
+contract.getDetails = async (base_url, address) => {
     spinner.start();
     let data;
     try{
@@ -57,7 +59,7 @@ contract.getDetails = async (base_url, address, spinner) => {
 ///////////////////////////////////////////////////////////////
 // Get details about the block where the contract is included//
 ///////////////////////////////////////////////////////////////
-contract.getBlock = async (base_url, address, spinner) => {
+contract.getBlock = async (base_url, address) => {
     spinner.start();
     let data; 
     try{   
@@ -93,7 +95,7 @@ contract.getBlock = async (base_url, address, spinner) => {
 ////////////////////////////////////////////////////////
 // Get details about the contract creation transaction//
 ////////////////////////////////////////////////////////
-contract.getCreationTxn = async (base_url, address, spinner) => {
+contract.getCreationTxn = async (base_url, address) => {
     spinner.start();
     let data; 
     try{   
@@ -130,7 +132,7 @@ contract.getCreationTxn = async (base_url, address, spinner) => {
 //////////////////////////////////////////////////////////////////
 // Get details about the transactions made to/from the contract //
 //////////////////////////////////////////////////////////////////
-contract.getTransactions = async (base_url, address, num, spinner) => {
+contract.getTransactions = async (base_url, address, num) => {
     let nextPageLink = "";
     let jsonData;
     num = parseInt(num);
@@ -200,7 +202,7 @@ contract.getTransactions = async (base_url, address, num, spinner) => {
 /////////////////////////////////////////////////////////////////////////////////////
 // Get details about the transactions made from a specific account to the contract //
 /////////////////////////////////////////////////////////////////////////////////////
-contract.getTransactionsFrom = async (base_url, address, account, spinner) => {
+contract.getTransactionsFrom = async (base_url, address, account) => {
     let nextPageLink = "";
     let jsonData;
     do{
@@ -255,7 +257,7 @@ contract.getTransactionsFrom = async (base_url, address, account, spinner) => {
 /////////////////////////////////////////////////////////////////////////////////////
 // Get details about the transactions made to a specific account from the contract //
 /////////////////////////////////////////////////////////////////////////////////////
-contract.getTransactionsTo = async (base_url, address, account, spinner) => {
+contract.getTransactionsTo = async (base_url, address, account) => {
     let nextPageLink = "";
     let jsonData;
     do{
@@ -309,7 +311,7 @@ contract.getTransactionsTo = async (base_url, address, account, spinner) => {
 //////////////////////////////////////////////////////////////////////////
 // Get details about the contract messages associated with the contract //
 //////////////////////////////////////////////////////////////////////////
-contract.getMessages = async (base_url, address, num, spinner) => {
+contract.getMessages = async (base_url, address, num) => {
     let nextPageLink = "";
     let jsonData;
     num = parseInt(num);
@@ -333,15 +335,14 @@ contract.getMessages = async (base_url, address, num, spinner) => {
                     data = await fetch(nextPageLink.replace("page[limit]=100", "page[limit]="+num.toString()));
                 }
             }
-            
+            jsonData = await data.json();
+            spinner.stop(); 
         }
         catch{
             spinner.stop()
             console.log(chalk.red("Error fetching data! Please try again later"));
             return;
         };
-        jsonData = await data.json();
-        spinner.stop();
 
         if(jsonData["errors"] != undefined){
             for(let i = 0; i < jsonData["errors"].length; i++){
@@ -382,7 +383,7 @@ contract.getMessages = async (base_url, address, num, spinner) => {
 //////////////////////////////////////////////////////////////////////////
 // Get details about the log entries (events) triggered by the contract //
 //////////////////////////////////////////////////////////////////////////
-contract.getLogEntries = async (base_url, address, num, spinner) => {
+contract.getLogEntries = async (base_url, address, num) => {
     let nextPageLink = "";
     let jsonData;
     num = parseInt(num);
@@ -405,8 +406,7 @@ contract.getLogEntries = async (base_url, address, num, spinner) => {
                 else{
                     data = await fetch(nextPageLink.replace("page[limit]=100", "page[limit]="+num.toString()));
                 }
-            }
-            
+            }  
         }
         catch{
             spinner.stop()
@@ -452,7 +452,11 @@ contract.getLogEntries = async (base_url, address, num, spinner) => {
     console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
 }
 
-contract.aggregateEventBySignature = async (base_url, address, eventSign, num, spinner) => {
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// Get details about the events triggered by the contract having the specified signature //
+///////////////////////////////////////////////////////////////////////////////////////////
+contract.aggregateEventBySignature = async (base_url, address, eventSign, num) => {
     let topic0 = keccak256(eventSign).toString("hex");
     let nextPageLink = "";
     let jsonData;
@@ -477,7 +481,6 @@ contract.aggregateEventBySignature = async (base_url, address, eventSign, num, s
                     data = await fetch(nextPageLink.replace("page[limit]=100", "page[limit]="+num.toString()));
                 }
             }
-            
         }
         catch{
             spinner.stop()
@@ -521,6 +524,14 @@ contract.aggregateEventBySignature = async (base_url, address, eventSign, num, s
     }
     while(num > 0 && jsonData["meta"]["page"]["hasNext"] == true)
     console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// Get details about the transactions made to/from contract within a specified time range //
+////////////////////////////////////////////////////////////////////////////////////////////
+contract.getTransactionsInRange = async (base_url, address, start, end) => {
+    // TODO: Implement search logic within API call
 }
 
 module.exports = contract;

@@ -4,7 +4,7 @@ require("isomorphic-fetch");
 
 let transaction = {}
 
-transaction.getDetails = async (base_url, hash, spinner) => {
+transaction.getDetails = async (base_url, hash) => {
     spinner.start();
     let data;
     try{

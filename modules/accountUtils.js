@@ -4,7 +4,7 @@ require("isomorphic-fetch");
 
 let account = {}
 
-account.getDetails = async (base_url, address, spinner) => {
+account.getDetails = async (base_url, address) => {
     spinner.start();
     let data;
     try{

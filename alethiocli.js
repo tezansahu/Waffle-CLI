@@ -8,7 +8,7 @@ const clear = require('clear');
 const figlet = require('figlet');
 const inquirer = require("inquirer");
 const ora = require('ora');
-
+const moment = require("moment");
 
 const contract = require("./modules/contractUtils");
 const transaction = require("./modules/transactionUtils");
@@ -62,58 +62,88 @@ program
     .description("Get general details about a contract deployed at the provided address")
     .option("-b, --block", "Show details about the block where the contract was created")
     .option("-c, --creationTxn", "Show details about the Contract Creation Transaction")
-    .option("-e, --event <event_signature>", "Aggregate events logged with the same <event_signature> (See example)")
+    .option("-E, --event <event_signature>", "Aggregate events logged with the same <event_signature> (see examples)")
     .option("-f, --transactionsFrom <account>", "Show details of transactions made from <account> to the contract")
     .option("-l, --logs", "Show details about <num> latest Log Entries (Events) associated with the contract")
     .option("-m, --messages", "Show details about <num> latest Contract Messages (Internal Transactions)")
     .option("-n, --number <num>", "Limit the search of transactions, messages, event logs, etc. to <num> latest entries")
+    .option("-s, --start <timeStamp>", "Date & Time (local) in RFC2822 format (see examples) marking the beginning of the range to search transactions")
+    .option("-e, --end <timeStamp>", "Date & Time (local) in RFC2822 format (see examples) marking the end of the range to search transactions")
     .option('-t, --transactions', "Show details about <num> latest transactions to/from the contract")
     .option("-T, --transactionsTo <account>", "Show details of transactions made to <account> by the contract")
     .on("--help", async () => {
-        console.log("\nNote: " + chalk.italic("Without the '-n' flag, the default number of transaction, messages, or events logs is 10"));
+        console.log("\nNote: " + chalk.italic("Without the '-n' flag, the default number of transaction, messages, or events logs displayed is 10"));
         console.log("\nExamples:");
-        console.log("   $ alethiocli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -e 'Transfer(address,address,value)' -n 50");
+        
+        console.log("   $ alethiocli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -t ");
+        console.log(chalk.gray("   // Displays 10 latest transactions to the contract\n"));
+        console.log("   $ alethiocli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -e 'Transfer(address,address,value)' -n 50 ");
+        console.log(chalk.gray("   // Displays 50 latest events logged by the contract with the given signature\n"))
+        console.log("   $ alethiocli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -f 0x2461AD11C10Ac35Dd8aDAfD6B0Af3AacFAf1C3f5 -n 15 ");
+        console.log(chalk.gray("   // Displays 15 latest transactions to the contract made by given account\n"));
+        console.log("   $ alethiocli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -m -s '5 Jul 2019 11:00' -e '5 Jul 2019 13:30'");
+        console.log(chalk.gray("   // Displays contract messages (internal transaction) occuring between 11:00 am & 1:30 pm on 5 July 2019 (according to local timezone)\n"));
     })
     .action(async (address, options) => {
-        await contract.getDetails(base_url, address, spinner);
         if(options.transactionsFrom != undefined && options.transactionsTo != undefined){
-            console.error(chalk.red("Cannot use from & to filters simultaneously!"));
+            console.error(chalk.red("Error: Cannot use from & to filters simultaneously!\n"));
             return;
         }
 
+        if((options.start != undefined && options.end == undefined) || (options.start ==undefined && options.end != undefined)){
+            console.error(chalk.red("Error: Both start & end timeStamps should be used together"));
+            return;
+        }
+
+        if(options.start != undefined && options.end != undefined && options.number != undefined){
+            console.error(chalk.red("Error: Cannot use number of transactions with start & end timestamps"));
+            return;
+        }
+
+        await contract.getDetails(base_url, address);
+
         if(options.transactions){
-            if(options.number != undefined && parseInt(options.number) < 0){
-                console.error(chalk.red("Number of transactions cannot be less than 0"));
-                return;
+            if(options.number != undefined){
+                if(parseInt(options.number) < 0){
+                    console.error(chalk.red("Number of transactions cannot be less than 0"));
+                    return;
+                }
+                await contract.getTransactions(base_url, address, options.number);
             }
-            await contract.getTransactions(base_url, address, options.number || 10, spinner);
+            if(options.start != undefined && options.end != undefined){
+                let start = moment(new Date(options.start).toUTCString()).valueOf()
+                let end = moment(new Date(options.end).toUTCString()).valueOf()
+                // console.log(start, end);
+                contract.getTransactionsInRange(base_url, address, start, end)
+            }
+            await contract.getTransactions(base_url, address, 10);
         }
         
         if(options.block){
-            await contract.getBlock(base_url, address, spinner);
+            await contract.getBlock(base_url, address);
         }
         
         if(options.creationTxn){
-            await contract.getCreationTxn(base_url, address, spinner);
+            await contract.getCreationTxn(base_url, address);
         }
         
         if(options.transactionsFrom){
-            await contract.getTransactionsFrom(base_url, address, options.number || 10, spinner);
+            await contract.getTransactionsFrom(base_url, address, options.number || 10);
         }
         else if(options.transactionsTo){
-            await contract.getTransactionsTo(base_url, address, options.number || 10, spinner);
+            await contract.getTransactionsTo(base_url, address, options.number || 10);
         }
 
         if(options.messages){
-            await contract.getMessages(base_url, address, options.number || 10, spinner);
+            await contract.getMessages(base_url, address, options.number || 10);
         }
 
         if(options.logs){
-            await contract.getLogEntries(base_url, address, options.number || 10, spinner);
+            await contract.getLogEntries(base_url, address, options.number || 10);
         }
 
         if(options.event != undefined){
-            await contract.aggregateEventBySignature(base_url, address, options.event, options.number || 10, spinner);
+            await contract.aggregateEventBySignature(base_url, address, options.event, options.number || 10);
         }
 
 
@@ -162,7 +192,7 @@ program
     .description("Get general details about the transaction given by the hash")
     // .options()
     .action(async (hash) => {
-        transaction.getDetails(base_url, hash, spinner);
+        transaction.getDetails(base_url, hash);
     })
 
 
@@ -171,7 +201,7 @@ program
     .description("Get general details about the account address")
     // .options()
     .action(async (address) => {
-        account.getDetails(base_url, address, spinner);
+        account.getDetails(base_url, address);
     })
 
 
@@ -180,7 +210,7 @@ program
     .description("Get general details about the block given by the block hash")
     // .options()
     .action(async (hash) => {
-        block.getDetails(base_url, hash, spinner);
+        block.getDetails(base_url, hash);
     })
 
 program.on("--help", function(){
