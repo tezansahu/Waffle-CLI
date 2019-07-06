@@ -103,20 +103,20 @@ program
         await contract.getDetails(base_url, address);
 
         if(options.transactions){
-            if(options.number != undefined){
+            if(options.number){
                 if(parseInt(options.number) < 0){
                     console.error(chalk.red("Number of transactions cannot be less than 0"));
                     return;
                 }
                 await contract.getTransactions(base_url, address, options.number);
             }
-            if(options.start != undefined && options.end != undefined){
+            else if(options.start && options.end){
                 let start = moment(new Date(options.start).toUTCString()).valueOf()
                 let end = moment(new Date(options.end).toUTCString()).valueOf()
                 // console.log(start, end);
-                contract.getTransactionsInRange(base_url, address, start, end)
+                await contract.getTransactionsInRange(base_url, address, start, end)
             }
-            await contract.getTransactions(base_url, address, 10);
+            else await contract.getTransactions(base_url, address, 10);
         }
         
         if(options.block){
