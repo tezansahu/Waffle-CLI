@@ -1,6 +1,9 @@
 const moment = require("moment");
 const chalk = require("chalk");
+const ora = require('ora');
 require("isomorphic-fetch");
+
+const spinner = ora('Fetching data from aleth.io');
 
 let transaction = {}
 

@@ -232,7 +232,7 @@ contract.getTransactionsFrom = async (base_url, address, account) => {
         }
         if(nextPageLink == ""){
             console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
-            console.log(chalk.bold.cyan(`Transactions [Count: ${num}]`))
+            console.log(chalk.bold.cyan(`Transactions`))
             console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
         }
 
@@ -287,7 +287,7 @@ contract.getTransactionsTo = async (base_url, address, account) => {
         }
         if(nextPageLink == ""){
             console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
-            console.log(chalk.bold.cyan(`Transactions [Count: ${num}]`))
+            console.log(chalk.bold.cyan(`Transactions`))
             console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
         }
         for(i = 0; i < jsonData["meta"]["count"]; i++){

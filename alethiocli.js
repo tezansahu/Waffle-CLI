@@ -14,6 +14,7 @@ const contract = require("./modules/contractUtils");
 const transaction = require("./modules/transactionUtils");
 const account = require("./modules/accountUtils");
 const block = require("./modules/blockUtils");
+const ensUtils = require("./modules/ensUtils");
 
 const spinner = ora('Fetching data from aleth.io');
 let base_url;
@@ -128,10 +129,32 @@ program
         }
         
         if(options.transactionsFrom){
-            await contract.getTransactionsFrom(base_url, address, options.number || 10);
+            if(!options.transactionsFrom.startsWith("0x") && options.transactionsFrom.length != 42){
+                let fromAcc = await ensUtils.getAddress(options.transactionsFrom);
+                if(fromAcc == "0x0000000000000000000000000000000000000000"){
+                    console.log(chalk.red("Error: ENS name not found!\n"));
+                    return;
+                }
+                await contract.getTransactionsFrom(base_url, address, fromAcc);  
+                  
+            }
+            else{
+                await contract.getTransactionsFrom(base_url, address, options.transactionsFrom);
+            }
+            
         }
         else if(options.transactionsTo){
-            await contract.getTransactionsTo(base_url, address, options.number || 10);
+            if(!options.transactionsTo.startsWith("0x") && options.transactionsTo.length != 42){
+                let toAcc = await ensUtils.getAddress(options.transactionsTo);
+                if(toAcc == "0x0000000000000000000000000000000000000000"){
+                    console.log(chalk.red("Error: ENS name not found!\n"));
+                    return;
+                }
+                await contract.getTransactionsFrom(base_url, address, toAcc);    
+            }
+            else{
+                await contract.getTransactionsTo(base_url, address, options.transactionsTo);
+            }
         }
 
         if(options.messages){
@@ -201,16 +224,27 @@ program
     .description("Get general details about the account address")
     // .options()
     .action(async (address) => {
-        account.getDetails(base_url, address);
+        if(!address.startsWith("0x") && address.length != 42){
+            let ethAddr = await ensUtils.getAddress(address);
+            if(ethAddr == "0x0000000000000000000000000000000000000000"){
+                console.log(chalk.red("Error: ENS name not found!\n"));
+                return;
+            }
+            await account.getDetails(base_url, ethAddr); 
+        }
+        else{
+            await account.getDetails(base_url, address);
+        }
+        
     })
 
 
 program
-    .command("block <hash>")
-    .description("Get general details about the block given by the block hash")
+    .command("block <identifier>")
+    .description("Get general details about the block given by the block hash or block number")
     // .options()
-    .action(async (hash) => {
-        block.getDetails(base_url, hash);
+    .action(async (identifier) => {
+        block.getDetails(base_url, identifier);
     })
 
 program.on("--help", function(){

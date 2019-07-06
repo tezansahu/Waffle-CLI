@@ -1,6 +1,9 @@
 const moment = require("moment");
 const chalk = require("chalk");
+const ora = require('ora');
 require("isomorphic-fetch");
+
+const spinner = ora('Fetching data from aleth.io');
 
 let account = {}
 
@@ -23,12 +26,14 @@ account.getDetails = async (base_url, address) => {
             return;
         }
     }
-
+    console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
+    console.log(chalk.bold.cyan(`Account Details`))
+    console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
     // console.log(jsonData);
     console.log("Address:\t\t", jsonData["data"]["attributes"]["address"]);
-    console.log("Balance:\t\t", jsonData["data"]["attributes"]["balance"]);
+    console.log("Balance:\t\t", (parseInt(jsonData["data"]["attributes"]["balance"])*Math.pow(10, -18)).toString(), "ETH");
     console.log("Nonce:\t\t\t", jsonData["data"]["attributes"]["nonce"]);
-    
+    console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))    
 }
 
 module.exports = account;

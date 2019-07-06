@@ -1,14 +1,17 @@
 const moment = require("moment");
 const chalk = require("chalk");
+const ora = require('ora');
 require("isomorphic-fetch");
+
+const spinner = ora('Fetching data from aleth.io');
 
 let block = {}
 
-block.getDetails = async (base_url, hash) => {
+block.getDetails = async (base_url, identifier) => {
     spinner.start();
     let data;
     try{
-        data = await fetch(base_url+`/blocks/${hash}`);
+        data = await fetch(base_url+`/blocks/${identifier}`);
     }
     catch{
         spinner.stop();
@@ -23,16 +26,19 @@ block.getDetails = async (base_url, hash) => {
             return;
         }
     }
-
+    console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
+    console.log(chalk.bold.cyan(`Block Details`))
+    console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
     // console.log(jsonData);
-    console.log("ID:\t\t\t\t", jsonData["data"]["attributes"]["blockHash"]);
+    console.log("Block Hash:\t\t\t", jsonData["data"]["attributes"]["blockHash"]);
+    console.log("Block Number:\t\t\t", jsonData["data"]["attributes"]["number"]);
     console.log("Beneficiary Reward:\t\t", jsonData["data"]["attributes"]["blockBeneficiaryReward"]);
     console.log("Difficulty:\t\t\t", jsonData["data"]["attributes"]["blockDifficulty"]);
     console.log("Gas Limit:\t\t\t", jsonData["data"]["attributes"]["blockGasLimit"]);
     console.log("Canonical:\t\t\t", jsonData["data"]["attributes"]["canonical"]);
     console.log("HasBeneficiaryAlias:\t\t", jsonData["data"]["attributes"]["hasBeneficiaryAlias"]);
     console.log("Gas Used:\t\t\t", jsonData["data"]["attributes"]["blockGasUsed"]);
-    console.log("Number:\t\t\t\t", jsonData["data"]["attributes"]["number"]);
+    console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
     
 }
 
