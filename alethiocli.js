@@ -114,7 +114,6 @@ program
             else if(options.start && options.end){
                 let start = moment(new Date(options.start).toUTCString()).valueOf()
                 let end = moment(new Date(options.end).toUTCString()).valueOf()
-                // console.log(start, end);
                 await contract.getTransactionsInRange(base_url, address, start, end)
             }
             else await contract.getTransactions(base_url, address, 10);
@@ -172,11 +171,23 @@ program
 
     })
 
+
+///////////////////////////////////////////
+// Command to search for an address/hash //
+///////////////////////////////////////////
 program
     .command("search <query>")
     .description("Checks whether the queried entity is an external account, contract account, transaction or a block hash")
     .action(async (query) => {
         spinner.start();
+        if(!query.startsWith("0x") && query.endsWith(".eth")){
+            let addr = await ensUtils.getAddress(query);
+            if(addr == "0x0000000000000000000000000000000000000000"){
+                console.log(chalk.red("Error: ENS name not found!\n"));
+                process.exit();
+            }
+            query = addr;   
+        }
         const e = await fetch(base_url+`/accounts/${query}`);
         const c = await fetch(base_url+`/contracts/${query}`);
         const t = await fetch(base_url+`/transactions/${query}`);
@@ -210,6 +221,9 @@ program
     
 
 
+///////////////////////////////////////////////////////////
+// Command to query details about a specific transaction //
+///////////////////////////////////////////////////////////
 program
     .command("transaction <hash>")
     .description("Get general details about the transaction given by the hash")
@@ -219,26 +233,70 @@ program
     })
 
 
+///////////////////////////////////////////////////////
+// Command to query details about a specific account //
+///////////////////////////////////////////////////////
 program
     .command("account <address>")
-    .description("Get general details about the account address")
+    .description("Get general details about the account address or ENS domain")
+    .option("-T, --tokenTransfers", "Get details about token transfers made to/from the <address>")
+    .option("-E, --etherTransfers", "Get details about ether transfers made to/from the <address>")
+    .option("-s, --symbol <symbol>", "Symbol of token to query for")
+    .option("-f, --from <fromAddress>", "Filter transfers by <from address>")
+    .option("-t, --to <toAddress>", "Filter transfers by <to address>")
     // .options()
-    .action(async (address) => {
-        if(!address.startsWith("0x") && address.length != 42){
-            let ethAddr = await ensUtils.getAddress(address);
+    .on("--help", async () => {
+        console.log("\nExamples:");
+        console.log("   $ alethiocli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5");
+        console.log(chalk.gray("   // Displays basic details about given <address> & 10 latest transactions\n"));
+        console.log("   $ alethiocli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -E -t 0xbae664a51bf25898bc587f8a1c650bebc2ef4cf3");
+        console.log(chalk.gray("   // Displays all ether transfers to <toAddress> from the given <address>\n"));
+        console.log("   $ alethiocli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -T");
+        console.log(chalk.gray("   // Displays all token transfers to/from the given <address>\n"));
+        console.log("   $ alethiocli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -T -s 'DAI'");
+        console.log(chalk.gray("   // Display all DAI token transfers to/from the given <address>\n"));
+        console.log("   $ alethiocli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -T -s 'DAI' -f 0x9ae49c0d7f8f9ef4b864e004fe86ac8294e20950");
+        console.log(chalk.gray("   // Display all DAI token transfers from the <fromAddress> to the given <address>\n"));
+        console.log("   $ alethiocli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -T -t 0x9ae49c0d7f8f9ef4b864e004fe86ac8294e20950");
+        console.log(chalk.gray("   // Display all DAI token transfers to the <toAddress> by the given <address>\n"));
+    })
+    .action(async (address, options) => {
+        let filters = {}
+        filters.exists = false;
+        if(options.etherTransfers && options.tokenTransfers){
+            console.log(chalk.red("Error: Cannot use both -etherTransfers & --tokenTransfers at the same time\n"));
+            return;
+        }
+        if(options.tokenTransfers || options.etherTransfers){
+            filters.exists = true;
+        }
+        filters.tokenTransfers = options.tokenTransfers;
+        filters.etherTransfers = options.etherTransfers;
+        filters.symbol = options.symbol;
+        filters.from = options.from;
+        filters.to = options.to
+        // console.log(filters)
+        let ethAddr;
+        if(!address.startsWith("0x") && address.length != 42 && address.endsWith(".eth")){
+            ethAddr = await ensUtils.getAddress(address);
             if(ethAddr == "0x0000000000000000000000000000000000000000"){
                 console.log(chalk.red("Error: ENS name not found!\n"));
                 return;
             }
-            await account.getDetails(base_url, ethAddr); 
+            // await account.getDetails(base_url, ethAddr); 
         }
         else{
-            await account.getDetails(base_url, address);
+            ethAddr = address;
+            // await account.getDetails(base_url, address);
         }
+        await account.getDetails(base_url, ethAddr, filters)
         
     })
 
 
+/////////////////////////////////////////////////////
+// Command to query details about a specific block //
+/////////////////////////////////////////////////////
 program
     .command("block <identifier>")
     .description("Get general details about the block given by the block hash or block number")
@@ -247,13 +305,21 @@ program
         block.getDetails(base_url, identifier);
     })
 
+
+//////////////////////////////
+// Custom help for over CLI //
+//////////////////////////////
 program.on("--help", function(){
     console.log("\n");
     console.log(chalk.italic.cyan("This is a CLI tool for Ethereum Developers, created by Tezan Sahu & Smit Rajput, using Aleth.io\n"));
+    console.log(chalk.italic.cyan("This project was started as a part of Gitcoin's Beyond Blockchain Hackathon, and aims to help developers " +
+        "monitor any smart contract using their CLI. \nThe tool also has several functionalities of a block explorer where developers could search for " +
+        "all that they want without going to a browser.\n"))
+    console.log(chalk.italic.cyan("Use the '--help' for a command to know the queries that could be made using the tool."));
 })
 
 
-// program.parse(process.argv)
+
 /////////////////////////////////////////////////////////////////////////////////////////
 // Parse the command (& options) entered by the user and call the appropriate function //
 /////////////////////////////////////////////////////////////////////////////////////////

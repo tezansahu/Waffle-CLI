@@ -189,6 +189,10 @@ contract.getTransactions = async (base_url, address, num) => {
             if(jsonData["data"][i]["attributes"]["msgPayload"]["funcDefinition"] != ""){
                 console.log("Function Called:\t", jsonData["data"][i]["attributes"]["msgPayload"]["funcDefinition"]);
             }
+            for(j = 0; j < jsonData["data"][i]["attributes"]["msgPayload"]["inputs"].length; j++){
+                let input = jsonData["data"][i]["attributes"]["msgPayload"]["inputs"][j];
+                console.log(`Input ${j+1}:\t\t`, `${input["value"]}\t[${input["name"]} (${input["type"]})]`);
+            }
             console.log(chalk.cyan("---------------------------------------------------------------------------------------------------------"))
         }
         num -= 100;

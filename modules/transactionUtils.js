@@ -48,8 +48,12 @@ transaction.getDetails = async (base_url, hash) => {
     if(jsonData["data"]["attributes"]["msgPayload"]["funcDefinition"] != ""){
         console.log("Function Called:\t", jsonData["data"]["attributes"]["msgPayload"]["funcDefinition"]);
     }
-    if(jsonData["data"]["attributes"]["msgPayload"]["raw"] != ""){
-        console.log("Raw Data Payload:\t", jsonData["data"]["attributes"]["msgPayload"]["raw"]);
+    // if(jsonData["data"]["attributes"]["msgPayload"]["raw"] != ""){
+    //     console.log("Raw Data Payload:\t", jsonData["data"]["attributes"]["msgPayload"]["raw"]);
+    // }
+    for(j = 0; j < jsonData["data"]["attributes"]["msgPayload"]["inputs"].length; j++){
+        let input = jsonData["data"]["attributes"]["msgPayload"]["inputs"][j];
+        console.log(`Input ${j+1}:\t\t`, `${input["value"]}\t[${input["name"]} (${input["type"]})]`);
     }
     console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
 }
