@@ -75,7 +75,8 @@ program
     .on("--help", async () => {
         console.log("\nNote: " + chalk.italic("Without the '-n' flag, the default number of transaction, messages, or events logs displayed is 10"));
         console.log("\nExamples:");
-        
+        console.log("   $ alethiocli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -b -c ");
+        console.log(chalk.gray("   // Displays the block details in which the contract creation was recorded along with the creation transaction\n"));
         console.log("   $ alethiocli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -t ");
         console.log(chalk.gray("   // Displays 10 latest transactions to the contract\n"));
         console.log("   $ alethiocli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -e 'Transfer(address,address,value)' -n 50 ");
@@ -172,9 +173,9 @@ program
     })
 
 
-///////////////////////////////////////////
-// Command to search for an address/hash //
-///////////////////////////////////////////
+//////////////////////////////////////////////////////
+// Command to search for an address/hash/ENS domain //
+//////////////////////////////////////////////////////
 program
     .command("search <query>")
     .description("Checks whether the queried entity is an external account, contract account, transaction or a block hash")
@@ -241,6 +242,7 @@ program
     .description("Get general details about the account address or ENS domain")
     .option("-T, --tokenTransfers", "Get details about token transfers made to/from the <address>")
     .option("-E, --etherTransfers", "Get details about ether transfers made to/from the <address>")
+    .option("-b, --tokenBalances", "Get balances of all tokens held by <address>")
     .option("-s, --symbol <symbol>", "Symbol of token to query for")
     .option("-f, --from <fromAddress>", "Filter transfers by <from address>")
     .option("-t, --to <toAddress>", "Filter transfers by <to address>")
@@ -267,9 +269,10 @@ program
             console.log(chalk.red("Error: Cannot use both -etherTransfers & --tokenTransfers at the same time\n"));
             return;
         }
-        if(options.tokenTransfers || options.etherTransfers){
+        if(options.tokenTransfers || options.etherTransfers || options.tokenBalances){
             filters.exists = true;
         }
+        filters.tokenBalances = options.tokenBalances;
         filters.tokenTransfers = options.tokenTransfers;
         filters.etherTransfers = options.etherTransfers;
         filters.symbol = options.symbol;

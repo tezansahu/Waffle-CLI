@@ -38,7 +38,6 @@ account.getDetails = async (base_url, address, filters) => {
     console.log("Balance:\t\t", (parseInt(jsonData["data"]["attributes"]["balance"])*Math.pow(10, -18)).toString(), "ETH");
     console.log("Transactions:\t\t", jsonData["data"]["attributes"]["nonce"]);
     console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------")); 
-    
     if(filters.exists != true){
         await getLatestTransactions(base_url, address);
     }
@@ -49,11 +48,55 @@ account.getDetails = async (base_url, address, filters) => {
         else if(filters.tokenTransfers){
             await getTokenTransfers(base_url, address, filters);
         }
+        else if(filters.tokenBalances){
+            await getTokenBalances(address);            
+        }
     }
     
 }
 
 
+
+getTokenBalances = async (address) => {
+    let spinner = ora("Fetching token balances");
+    let url = `https://web3api.io/api/v1/addresses/${address}/tokens`;
+    let api_key = "UAK85fcd3c978f3c11801d9dbb5c989a815";
+    spinner.start();
+    let data;
+    try{
+        data = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'x-api-key': api_key,
+            }
+        });
+    }
+    catch{
+        spinner.stop();
+        console.log(chalk.red("Error fetching data! Please try again later"))
+        return;
+    }
+    let jsonData = await data.json();
+    spinner.stop();
+    if(jsonData["errors"] != undefined){
+        for(let i = 0; i < jsonData["errors"].length; i++){
+            console.error(chalk.red("Error " + jsonData["errors"][i]["status"] + ": " + jsonData["errors"][i]["title"]))
+            return;
+        }
+    }
+    console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
+    console.log(chalk.bold.cyan(`Token Balances [Count: ${jsonData["payload"]["totalRecords"]}]`))
+    console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
+    // console.log(jsonData["payload"]["records"]);
+    for(let i = 0; i < parseInt(jsonData["payload"]["totalRecords"]); i++){
+        console.log("Name:\t\t", jsonData["payload"]["records"][i]["name"]);
+        console.log("Symbol:\t\t", jsonData["payload"]["records"][i]["symbol"]);
+        console.log("Address:\t", jsonData["payload"]["records"][i]["address"]);
+        console.log("Amount Held:\t", (parseInt(jsonData["payload"]["records"][i]["amount"])*Math.pow(10, -1 * parseInt(jsonData["payload"]["records"][i]["decimals"]))).toString());
+        console.log(chalk.cyan("---------------------------------------------------------------------------------------------------------"));
+    }
+    console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
+}
 ///////////////////////////////////////////////////////////////////////
 // Get details about 10 latest transactions made to/from the account //
 ///////////////////////////////////////////////////////////////////////
