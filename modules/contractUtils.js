@@ -236,7 +236,7 @@ contract.getTransactionsFrom = async (base_url, address, account) => {
         }
         if(nextPageLink == ""){
             console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
-            console.log(chalk.bold.cyan(`Transactions`))
+            console.log(chalk.bold.cyan(`Transactions from ${account}`))
             console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
         }
 
@@ -291,7 +291,7 @@ contract.getTransactionsTo = async (base_url, address, account) => {
         }
         if(nextPageLink == ""){
             console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
-            console.log(chalk.bold.cyan(`Transactions`))
+            console.log(chalk.bold.cyan(`Transactions To ${account}`))
             console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
         }
         for(i = 0; i < jsonData["meta"]["count"]; i++){
@@ -537,7 +537,7 @@ contract.aggregateEventBySignature = async (base_url, address, eventSign, num) =
 contract.getTransactionsInRange = async (base_url, address, start, end) => {
     let nextPageLink = "";
     let jsonData;
-    let rangeFound = false;
+    // let rangeFound = false;
     do{
         spinner.start();
         let data; 
@@ -565,7 +565,7 @@ contract.getTransactionsInRange = async (base_url, address, start, end) => {
         }
         if(nextPageLink == ""){
             console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
-            console.log(chalk.bold.cyan(`Transactions`))
+            console.log(chalk.bold.cyan(`Transactions between ${moment.unix(start/1000).toString()} & ${moment.unix(end/1000).toString()}`))
             console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
         }
         
@@ -586,6 +586,72 @@ contract.getTransactionsInRange = async (base_url, address, start, end) => {
             }
         }
         nextPageLink = `${base_url}/contracts/${address}/transactions?page[limit]=100&page` + jsonData["links"]["next"].substring(jsonData["links"]["next"].indexOf("[next]"));
+    } while(jsonData["data"][jsonData["meta"]["count"]-1]["attributes"]["blockCreationTime"] >= start/1000 && jsonData["meta"]["page"]["hasNext"] == true)
+
+    console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Get details about the messages made to/from contract within a specified time range //
+////////////////////////////////////////////////////////////////////////////////////////
+contract.getMessagesInRange = async (base_url, address, start, end) => {
+    let nextPageLink = "";
+    let jsonData;
+    let rangeFound = false;
+    do{
+        spinner.start();
+        let data; 
+        try{   
+            if(nextPageLink == ""){
+                data = await fetch(base_url+`/contracts/${address}/contractMessages/?page[limit]=100`);
+            }
+            else{
+                data = await fetch(nextPageLink);
+            }   
+        }
+        catch{
+            spinner.stop()
+            console.log(chalk.red("Error fetching data! Please try again later"));
+            return;
+        }
+        jsonData = await data.json();
+        spinner.stop();
+
+        if(jsonData["errors"] != undefined){
+            for(let i = 0; i < jsonData["errors"].length; i++){
+                console.error(chalk.red("Error " + jsonData["errors"][i]["status"] + ": " + jsonData["errors"][i]["title"]))
+                return;
+            }
+        }
+        if(nextPageLink == ""){
+            console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
+            console.log(chalk.bold.cyan(`Contract Messages between ${moment.unix(start/1000).toString()} & ${moment.unix(end/1000).toString()}`))
+            console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))
+        }
+        
+        for(i = 0; i < jsonData["meta"]["count"]; i++){
+            if(jsonData["data"][i]["attributes"]["blockCreationTime"] >= start/1000 && jsonData["data"][i]["attributes"]["blockCreationTime"] <= end/1000){
+                // console.log(jsonData["data"][i])
+                console.log("Contract Message Hash:\t", jsonData["data"][i]["id"].replace("msg:", "").substring(0, 66));
+                console.log("Message Type:\t\t", jsonData["data"][i]["attributes"]["msgType"]);
+                console.log("From:\t\t\t", jsonData["data"][i]["relationships"]["from"]["data"]["id"]);
+                console.log("To:\t\t\t", jsonData["data"][i]["relationships"]["to"]["data"]["id"]);
+                console.log("Originator:\t\t", jsonData["data"][i]["relationships"]["originator"]["data"]["id"]);
+                console.log("Parent Transaction:\t", jsonData["data"][i]["relationships"]["transaction"]["data"]["id"])
+                console.log("Message Index:\t\t", jsonData["data"][i]["attributes"]["cmsgIndex"]);
+                console.log("Timestamp:\t\t", moment.unix(parseInt(jsonData["data"][i]["attributes"]["blockCreationTime"])).local().toString());
+                console.log("Gas Used:\t\t", jsonData["data"][i]["attributes"]["msgGasUsed"]);
+                console.log("Gas Price:\t\t", jsonData["data"][i]["attributes"]["txGasPrice"], "Wei");
+                console.log("Transaction Fee:\t", (parseInt(jsonData["data"][i]["attributes"]["fee"])*Math.pow(10, -18)).toString(), "ETH");            
+                if(jsonData["data"][i]["attributes"]["msgPayload"]["funcDefinition"] != ""){
+                    console.log("Function Called:\t", jsonData["data"][i]["attributes"]["msgPayload"]["funcDefinition"]);
+                }
+                console.log(chalk.cyan("---------------------------------------------------------------------------------------------------------"))
+                rangeFound = true;
+            }
+        }
+        nextPageLink = `${base_url}/contracts/${address}/contractMessages?page[limit]=100&page` + jsonData["links"]["next"].substring(jsonData["links"]["next"].indexOf("[next]"));
     } while(jsonData["data"][jsonData["meta"]["count"]-1]["attributes"]["blockCreationTime"] >= start/1000 && jsonData["meta"]["page"]["hasNext"] == true)
 
     console.log(chalk.bold.cyan("---------------------------------------------------------------------------------------------------------------"))

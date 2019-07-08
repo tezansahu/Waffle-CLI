@@ -158,7 +158,13 @@ program
         }
 
         if(options.messages){
-            await contract.getMessages(base_url, address, options.number || 10);
+            if(options.start && options.end){
+                let start = moment(new Date(options.start).toUTCString()).valueOf()
+                let end = moment(new Date(options.end).toUTCString()).valueOf()
+                await contract.getMessagesInRange(base_url, address, start, end)
+            }
+            // else await contract.getTransactions(base_url, address, 10);
+            else await contract.getMessages(base_url, address, options.number || 10);
         }
 
         if(options.logs){
@@ -303,9 +309,9 @@ program
 program
     .command("block <identifier>")
     .description("Get general details about the block given by the block hash or block number")
-    // .options()
-    .action(async (identifier) => {
-        block.getDetails(base_url, identifier);
+    .option("-t, --transactions", "Display details about all transactions included in the block")
+    .action(async (identifier, options) => {
+        block.getDetails(base_url, identifier, options.transactions);
     })
 
 
@@ -315,10 +321,8 @@ program
 program.on("--help", function(){
     console.log("\n");
     console.log(chalk.italic.cyan("This is a CLI tool for Ethereum Developers, created by Tezan Sahu & Smit Rajput, using Aleth.io\n"));
-    console.log(chalk.italic.cyan("This project was started as a part of Gitcoin's Beyond Blockchain Hackathon, and aims to help developers " +
-        "monitor any smart contract using their CLI. \nThe tool also has several functionalities of a block explorer where developers could search for " +
-        "all that they want without going to a browser.\n"))
-    console.log(chalk.italic.cyan("Use the '--help' for a command to know the queries that could be made using the tool."));
+    console.log(chalk.italic.cyan("This project was started as a part of Gitcoin's Beyond Blockchain Hackathon aiming to serve as a CLI block explorer curated for developers to monitor smart contracts & much more.\n"))
+    console.log(chalk.italic.cyan("Use the '--help' for a command to know the queries that could be made using the tool.\n"));
 })
 
 

@@ -56,7 +56,9 @@ account.getDetails = async (base_url, address, filters) => {
 }
 
 
-
+////////////////////////////////////////////////////////////////
+// Get all token balances for an account (using Amberdata API)//
+////////////////////////////////////////////////////////////////
 getTokenBalances = async (address) => {
     let spinner = ora("Fetching token balances");
     let url = `https://web3api.io/api/v1/addresses/${address}/tokens`;
