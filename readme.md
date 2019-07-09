@@ -1,7 +1,7 @@
 <h1 align="center">Waffle-CLI</h1>
 <p align="center">
 <a href="https://travis-ci.org/tezansahu/Waffle-CLI.svg?branch=master">
-    <img src="https://img.shields.io/travis/tezansahu/Waffle-CLI/master.svg?style=for-the-badge" align="center">
+    <img src="https://travis-ci.org/tezansahu/Waffle-CLI.svg?branch=master" align="center">
 </a>
 </p>
 <p align="center">An Ethereum CLI explorer curated for smart contract monitoring & much more</p>
