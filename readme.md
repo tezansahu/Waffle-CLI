@@ -1,6 +1,8 @@
-# Waffle-CLI
+<h1 style="text-align: center">Waffle-CLI</h1>
 
-Waffle-CLI Explorer is a CLI tool for Ethereum Developers, created by [Tezan Sahu](https://github.com/tezansahu) & [Smit Rajput](https://github.com/smitrajput), using Aleth.io API. This project was started as a part of Gitcoin's Beyond Blockchain Hackathon aiming to serve as a CLI block explorer curated for developers to monitor smart contracts & much more.
+***
+
+Waffle-CLI Explorer :computer: is a CLI tool for Ethereum Developers, created using Aleth.io API. This project was started as a part of Gitcoin's Beyond Blockchain Hackathon aiming to serve as a CLI block explorer curated for developers to monitor smart contracts & much more.
 
 ***
 ## Setting it up
@@ -17,7 +19,7 @@ Waffle-CLI Explorer is a CLI tool for Ethereum Developers, created by [Tezan Sah
 
 ## Commands
 
-### Basic Searching
+### Basic Searching :mag:
 ***
 
 ```javascript
@@ -25,7 +27,7 @@ $ waffle-cli search <identifier>
 ```
 This allows you to search for any transaction/block hash & for any account/contract address. The search support **ENS name resolution** as well.
 
-### Account-Related Details
+### Account-Related Details :bank: :credit_card:
 ***
 
 ```javascript
@@ -65,7 +67,7 @@ $ alethiocli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -T -t 0x9ae49c0d
 // Display all DAI token transfers to the <toAddress> by the given <address>
 ```
 
-### Contract-Related Details
+### Contract-Related Details :page_with_curl:
 ***
 
 ```javascript
@@ -117,10 +119,19 @@ This command is used to get general details about the block given by the block h
 #### Options:
 * `-t` or `--transactions`: Display details about all transactions included in the block
 
-### Transaction-Related Details
+### Transaction-Related Details :moneybag: :dollar:
 ***
 
 ```javascript
 $ waffle-cli transaction <hash>
 ```
 This command is used to get general details about the transaction given by the hash.
+
+## License
+***
+[MIT](https://tldrlegal.com/license/mit-license)
+
+
+***
+
+<p align="center">Created with ❤️ by <a href="https://www.linkedin.com/in/tezan-sahu-a85802163/">Tezan Sahu</a> & <a href="https://www.linkedin.com/in/smit-r-417517139/">Smit Rajput</a></p>
