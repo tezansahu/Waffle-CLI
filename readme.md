@@ -1,6 +1,4 @@
-<h1 style="text-align: center">Waffle-CLI</h1>
-
-***
+<h1 align="center">Waffle-CLI</h1>
 
 Waffle-CLI Explorer :computer: is a CLI tool for Ethereum Developers, created using Aleth.io API. This project was started as a part of Gitcoin's Beyond Blockchain Hackathon aiming to serve as a CLI block explorer curated for developers to monitor smart contracts & much more.
 
@@ -128,7 +126,6 @@ $ waffle-cli transaction <hash>
 This command is used to get general details about the transaction given by the hash.
 
 ## License
-***
 [MIT](https://tldrlegal.com/license/mit-license)
 
 
