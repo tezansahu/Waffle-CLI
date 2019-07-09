@@ -334,7 +334,7 @@ async function run(){
     clear();
     console.log(
         chalk.yellow(
-            figlet.textSync('aleth.io CLI', { horizontalLayout: 'full' })
+            figlet.textSync('waffle-CLI', { horizontalLayout: 'full' })
         )
     );
     let api_key_verified = await checkAPIkey();

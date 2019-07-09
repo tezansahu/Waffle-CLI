@@ -1,24 +1,27 @@
 {
-  "name": "alethiocli",
-  "version": "1.0.0",
-  "description": "CLI Explorer for Ethereum Contracts using Alethio API",
-  "main": "alethiocli.js",
+  "name": "waffle-cli",
+  "version": "0.0.1",
+  "description": "An Ethereum CLI explorer curated for smart contract monitoring & much more",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tezansahu/AlethioCLI.git"
+    "url": "git+https://github.com/tezansahu/Waffle-CLI.git"
   },
   "keywords": [
     "Alethio"
   ],
   "author": "Tezan Sahu, Smit Rajput",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/tezansahu/AlethioCLI/issues"
+  "license": "MIT",
+  "bin": {
+    "waffle-cli": "./index.js"
   },
-  "homepage": "https://github.com/tezansahu/AlethioCLI#readme",
+  "bugs": {
+    "url": "https://github.com/tezansahu/Waffle-CLI/issues"
+  },
+  "homepage": "https://github.com/tezansahu/Waffle-CLI#readme",
   "dependencies": {
     "chalk": "^2.4.2",
     "clear": "^0.1.0",
