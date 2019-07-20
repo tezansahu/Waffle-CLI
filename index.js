@@ -75,15 +75,15 @@ program
     .on("--help", async () => {
         console.log("\nNote: " + chalk.italic("Without the '-n' flag, the default number of transaction, messages, or events logs displayed is 10"));
         console.log("\nExamples:");
-        console.log("   $ alethiocli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -b -c ");
+        console.log("   $ waffle-cli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -b -c ");
         console.log(chalk.gray("   // Displays the block details in which the contract creation was recorded along with the creation transaction\n"));
-        console.log("   $ alethiocli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -t ");
+        console.log("   $ waffle-cli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -t ");
         console.log(chalk.gray("   // Displays 10 latest transactions to the contract\n"));
-        console.log("   $ alethiocli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -e 'Transfer(address,address,value)' -n 50 ");
+        console.log("   $ waffle-cli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -E 'Transfer(address,address,uint256)' -n 50 ");
         console.log(chalk.gray("   // Displays 50 latest events logged by the contract with the given signature\n"))
-        console.log("   $ alethiocli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -f 0x2461AD11C10Ac35Dd8aDAfD6B0Af3AacFAf1C3f5 -n 15 ");
+        console.log("   $ waffle-cli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -f 0x2461AD11C10Ac35Dd8aDAfD6B0Af3AacFAf1C3f5 -n 15 ");
         console.log(chalk.gray("   // Displays 15 latest transactions to the contract made by given account\n"));
-        console.log("   $ alethiocli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -m -s '5 Jul 2019 11:00' -e '5 Jul 2019 13:30'");
+        console.log("   $ waffle-cli contract 0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359 -m -s '5 Jul 2019 11:00' -e '5 Jul 2019 13:30'");
         console.log(chalk.gray("   // Displays contract messages (internal transaction) occuring between 11:00 am & 1:30 pm on 5 July 2019 (according to local timezone)\n"));
     })
     .action(async (address, options) => {
@@ -207,19 +207,19 @@ program
 
         if(es == 200 && cs == 200) {
             console.log(chalk.bold.cyan('Contract Account'));
-            console.log(`Use ` + chalk.italic.yellow(`'alethiocli contract ${query} [options]'`) +` to get more details\n`);
+            console.log(`Use ` + chalk.italic.yellow(`'waffle-cli contract ${query} [options]'`) +` to get more details\n`);
         }
         else if (es == 200) {
             console.log(chalk.bold.cyan('External(User) Account'));
-            console.log(`Use ` + chalk.italic.yellow(`'alethiocli account ${query} [options]'`) +` to get more details\n`);
+            console.log(`Use ` + chalk.italic.yellow(`'waffle-cli account ${query} [options]'`) +` to get more details\n`);
         }
         else if (ts == 200) {
             console.log(chalk.bold.cyan('Transaction'));
-            console.log(`Use ` + chalk.italic.yellow(`'alethiocli transaction ${query} [options]'`) +` to get more details\n`);
+            console.log(`Use ` + chalk.italic.yellow(`'waffle-cli transaction ${query} [options]'`) +` to get more details\n`);
         }
         else if (bs == 200) {
             console.log(chalk.bold.cyan('Block Hash'));
-            console.log(`Use ` + chalk.italic.yellow(`'alethiocli block ${query} [options]'`) +` to get more details\n`);
+            console.log(`Use ` + chalk.italic.yellow(`'waffle-cli block ${query} [options]'`) +` to get more details\n`);
         }
         else{
             console.error(chalk.red("Error: Incorrect query!\n"))
@@ -255,17 +255,17 @@ program
     // .options()
     .on("--help", async () => {
         console.log("\nExamples:");
-        console.log("   $ alethiocli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5");
+        console.log("   $ waffle-cli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5");
         console.log(chalk.gray("   // Displays basic details about given <address> & 10 latest transactions\n"));
-        console.log("   $ alethiocli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -E -t 0xbae664a51bf25898bc587f8a1c650bebc2ef4cf3");
+        console.log("   $ waffle-cli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -E -t 0xbae664a51bf25898bc587f8a1c650bebc2ef4cf3");
         console.log(chalk.gray("   // Displays all ether transfers to <toAddress> from the given <address>\n"));
-        console.log("   $ alethiocli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -T");
+        console.log("   $ waffle-cli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -T");
         console.log(chalk.gray("   // Displays all token transfers to/from the given <address>\n"));
-        console.log("   $ alethiocli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -T -s 'DAI'");
+        console.log("   $ waffle-cli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -T -s 'DAI'");
         console.log(chalk.gray("   // Display all DAI token transfers to/from the given <address>\n"));
-        console.log("   $ alethiocli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -T -s 'DAI' -f 0x9ae49c0d7f8f9ef4b864e004fe86ac8294e20950");
+        console.log("   $ waffle-cli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -T -s 'DAI' -f 0x9ae49c0d7f8f9ef4b864e004fe86ac8294e20950");
         console.log(chalk.gray("   // Display all DAI token transfers from the <fromAddress> to the given <address>\n"));
-        console.log("   $ alethiocli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -T -t 0x9ae49c0d7f8f9ef4b864e004fe86ac8294e20950");
+        console.log("   $ waffle-cli account 0x2461ad11c10ac35dd8adafd6b0af3aacfaf1c3f5 -T -t 0x9ae49c0d7f8f9ef4b864e004fe86ac8294e20950");
         console.log(chalk.gray("   // Display all DAI token transfers to the <toAddress> by the given <address>\n"));
     })
     .action(async (address, options) => {
