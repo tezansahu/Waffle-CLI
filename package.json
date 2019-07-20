@@ -11,7 +11,10 @@
     "url": "git+https://github.com/tezansahu/Waffle-CLI.git"
   },
   "keywords": [
-    "Alethio"
+    "alethio",
+    "ethereum",
+    "CLI",
+    "explorer"
   ],
   "author": "Tezan Sahu, Smit Rajput",
   "license": "MIT",

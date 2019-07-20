@@ -1,4 +1,13 @@
 <h1 align="center">Waffle-CLI</h1>
+<p align="center">
+<a href="https://travis-ci.org/tezansahu/Waffle-CLI.svg?branch=master">
+    <img src="https://travis-ci.org/tezansahu/Waffle-CLI.svg?branch=master" align="center">
+    <img src="https://img.shields.io/github/license/tezansahu/Waffle-CLI.svg?logoColor=blue" align="center">
+</a>
+</p>
+<p align="center">An Ethereum CLI explorer curated for smart contract monitoring & much more</p>
+
+***
 
 Waffle-CLI Explorer :computer: is a CLI tool for Ethereum Developers, created using Aleth.io API. This project was started as a part of Gitcoin's Beyond Blockchain Hackathon aiming to serve as a CLI block explorer curated for developers to monitor smart contracts & much more.
 
@@ -10,6 +19,11 @@ Waffle-CLI Explorer :computer: is a CLI tool for Ethereum Developers, created us
 3. Use `npm i -g` to install the cli globally so that you can use the command `waffle-cli` to work with the CLI Explorer. You may need to use `sudo` for this.
 4. Start using the tool by `waffle-cli [command] [options]`
 5. While using for the first time, you will be asked for an API key. You could obtain you free Aleth.io API Key by going to https://developers.aleth.io/
+
+Waffle-CLI can also be installed directly from npm using:
+```javascript
+$ npm install -g waffle-cli
+```
 
 <img src="./assets/gifs/Waffle-CLI_apiKeySetting.gif" alt="Waffle-CLI_apiKeySetting" style="width:70%; margin-left: auto; margin-right: auto; display: block">
 
@@ -124,9 +138,6 @@ This command is used to get general details about the block given by the block h
 $ waffle-cli transaction <hash>
 ```
 This command is used to get general details about the transaction given by the hash.
-
-## License
-[MIT](https://tldrlegal.com/license/mit-license)
 
 
 ***
